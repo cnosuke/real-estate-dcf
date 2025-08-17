@@ -1,24 +1,31 @@
+// Constrained numeric types for type safety
+export type Percentage = number & { readonly __brand: 'Percentage' } // [0, 1]
+export type PositiveNumber = number & { readonly __brand: 'PositiveNumber' } // > 0
+export type NonNegativeNumber = number & { readonly __brand: 'NonNegativeNumber' } // >= 0
+export type Year = number & { readonly __brand: 'Year' } // >= 1
+export type Rate = number & { readonly __brand: 'Rate' } // >= 0
+
 export type Input = {
-  // ベース
-  p0: number // 物件購入額（本体）
-  i0: number // 初期諸費用
-  rentMonthly0: number // 初期家賃(月) 管理費等込み
-  monthlyOpex0: number // 月次諸費用(月)（税を除く）
-  vacancy: number // 想定空室率 [0..1]
-  inflation: number // インフレ率(年)
-  rentDecay: number // 家賃逓減率(年)
-  priceDecay: number // 物件価値逓減率(年)
-  taxAnnualFixed: number // 固定資産税・都市計画税（年額固定、インフレ連動なし）
-  exitCostRate: number // 売却コスト率 [0..1]
-  years: number // 保有年数 N
-  // 割引率
-  discountAsset: number // 資産割引率（アンレバ用）
-  discountEquity: number // エクイティ割引率
-  // 借入（元利均等）
-  loanAmount: number // 借入額 L（0なら無借入）
-  loanRate: number // 金利 r_ℓ（年）
-  loanTerm: number // 返済年数 n_ℓ
-  prepayPenaltyRate?: number // 繰上償還ペナルティ率（任意）
+  // Base property information
+  p0: number // Property purchase price (excluding fees) - should be positive
+  i0: number // Initial costs - should be positive
+  rentMonthly0: number // Initial monthly rent (including management fees) - should be positive
+  monthlyOpex0: number // Monthly operating expenses (excluding taxes) - should be positive
+  vacancy: number // Expected vacancy rate [0..1] - should be percentage
+  inflation: number // Annual inflation rate - should be non-negative
+  rentDecay: number // Annual rent decline rate - should be non-negative
+  priceDecay: number // Annual property value decline rate - should be non-negative
+  taxAnnualFixed: number // Fixed annual property tax (not inflation-adjusted) - should be positive
+  exitCostRate: number // Sale cost rate [0..1] - should be percentage
+  years: number // Holding period (years) - should be integer >= 1
+  // Discount rates
+  discountAsset: number // Asset discount rate (for unlevered analysis) - should be non-negative
+  discountEquity: number // Equity discount rate - should be non-negative
+  // Loan information (level payment)
+  loanAmount: number // Loan amount (0 if no loan) - should be non-negative
+  loanRate: number // Interest rate (annual) - should be non-negative
+  loanTerm: number // Repayment period (years) - should be integer >= 1
+  prepayPenaltyRate?: number // Prepayment penalty rate (optional) - should be percentage
 }
 
 export type DebtYear = {
@@ -31,15 +38,16 @@ export type DebtYear = {
 }
 
 export type Result = {
-  cfAsset: number[] // アンレバCF（0..N）
-  cfEquity: number[] // エクイティCF（0..N）
-  npvAsset: number
-  npvEquity: number
-  irrAsset: number
-  irrEquity: number
-  salePriceNet: number // 売却純額（コスト控除後）
-  remainingDebtAtExit: number // 売却時残債（保有<返済期間の場合）
-  implicitCap?: number // 暗黙のCap（検算用）= NOI_{N+1}/P_N（任意）
+  cfAsset: number[] // Unlevered cash flows (years 0..N)
+  cfEquity: number[] // Equity cash flows (years 0..N)
+  npvAsset: number // Net present value of unlevered cash flows
+  npvEquity: number // Net present value of equity cash flows
+  irrAsset: number // Internal rate of return for unlevered cash flows
+  irrEquity: number // Internal rate of return for equity cash flows
+  salePriceNet: number // Net sale price (after costs)
+  remainingDebtAtExit: number // Remaining debt at exit (if holding < loan term)
+  implicitCap?: number // Implicit cap rate for validation = NOI_{N+1}/P_N (optional)
+  warnings?: unknown[] // Calculation warnings that don't prevent computation (DCFError[])
 }
 
 export type DCFDataset = {

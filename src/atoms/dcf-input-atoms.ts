@@ -1,31 +1,31 @@
 import { atom } from 'jotai'
 
-// 基本パラメータ
-export const p0Atom = atom(50_000_000) // 物件購入額
-export const i0Atom = atom(1_500_000) // 初期諸費用
-export const rentMonthly0Atom = atom(180_000) // 初期月額家賃
-export const monthlyOpex0Atom = atom(30_000) // 月次諸費用
-export const vacancyAtom = atom(0.05) // 空室率
-export const inflationAtom = atom(0.02) // インフレ率
-export const rentDecayAtom = atom(0.01) // 家賃逓減率
-export const priceDecayAtom = atom(0.005) // 価格逓減率
-export const taxAnnualFixedAtom = atom(120_000) // 固定資産税
+// Base parameters - using plain numbers for UI compatibility
+export const p0Atom = atom(50_000_000) // Property purchase price
+export const i0Atom = atom(1_500_000) // Initial costs
+export const rentMonthly0Atom = atom(180_000) // Initial monthly rent
+export const monthlyOpex0Atom = atom(30_000) // Monthly operating expenses
+export const vacancyAtom = atom(0.05) // Vacancy rate
+export const inflationAtom = atom(0.02) // Inflation rate
+export const rentDecayAtom = atom(0.01) // Rent decay rate
+export const priceDecayAtom = atom(0.005) // Price decay rate
+export const taxAnnualFixedAtom = atom(120_000) // Fixed property tax
 
-// 売却関連
-export const exitCostRateAtom = atom(0.03) // 売却コスト率
-export const yearsAtom = atom(10) // 保有年数
+// Sale parameters
+export const exitCostRateAtom = atom(0.03) // Sale cost rate
+export const yearsAtom = atom(10) // Holding period
 
-// 割引率
-export const discountAssetAtom = atom(0.06) // 資産割引率（物件全体の投資利回り）
-export const discountEquityAtom = atom(0.1) // 自己資金割引率（現金投資の期待利回り）
+// Discount rates
+export const discountAssetAtom = atom(0.06) // Asset discount rate
+export const discountEquityAtom = atom(0.1) // Equity discount rate
 
-// 借入
-export const loanAmountAtom = atom(35_000_000) // 借入額
-export const loanRateAtom = atom(0.025) // 借入金利
-export const loanTermAtom = atom(25) // 返済年数
-export const prepayPenaltyRateAtom = atom(0.0) // 繰上償還ペナルティ率
+// Loan parameters
+export const loanAmountAtom = atom(60_000_000) // Loan amount (temporarily set higher than property price for testing)
+export const loanRateAtom = atom(0.025) // Loan rate
+export const loanTermAtom = atom(25) // Loan term
+export const prepayPenaltyRateAtom = atom(0.0) // Prepayment penalty rate
 
-// 統合入力Atom（自動計算用）
+// Consolidated input atom for DCF calculation
 export const dcfInputAtom = atom((get) => ({
   p0: get(p0Atom),
   i0: get(i0Atom),

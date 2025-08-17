@@ -1,13 +1,10 @@
 import { useAtomValue } from 'jotai'
 import {
   AlertTriangle,
-  CheckCircle,
-  Clock,
   TrendingUp,
-  XCircle,
 } from 'lucide-react'
 import { discountAssetAtom, discountEquityAtom } from '@/atoms/dcf-input-atoms'
-import { dcfResultAtom } from '@/atoms/dcf-output-atoms'
+import { dcfResultAtom, currentDCFErrorAtom, hasCalculationErrorAtom } from '@/atoms/dcf-output-atoms'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   Card,
@@ -25,94 +22,42 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { formatCurrency, formatPercent } from '@/lib/format-utils'
+import { calculatePaybackPeriod, getInvestmentGrade } from '@/lib/investment-utils'
+import { ErrorList } from '@/components/common/ErrorDisplay'
+import { DCFError } from '@/lib/error-utils'
 
-// 投資判断のヘルパー関数
-const getInvestmentGrade = (npv: number, irr: number, discountRate: number) => {
-  if (npv > 0 && irr > discountRate + 0.01) {
-    return {
-      grade: 'excellent',
-      variant: 'default' as const,
-      label: '良い投資',
-      bgColor: 'bg-green-500',
-      textColor: 'text-white',
-      icon: CheckCircle,
-      description: 'NPVが正でIRRが基準を大きく上回っています',
-    }
-  } else if (npv >= 0 && irr >= discountRate) {
-    return {
-      grade: 'good',
-      variant: 'default' as const,
-      label: '投資可',
-      bgColor: 'bg-blue-500',
-      textColor: 'text-white',
-      icon: CheckCircle,
-      description: 'NPVが正でIRRが基準を上回っています',
-    }
-  } else if (npv >= -1000000 && irr >= discountRate - 0.01) {
-    return {
-      grade: 'caution',
-      variant: 'secondary' as const,
-      label: '要検討',
-      bgColor: 'bg-yellow-500',
-      textColor: 'text-white',
-      icon: Clock,
-      description: 'NPVまたはIRRが基準を下回っています',
-    }
-  } else {
-    return {
-      grade: 'poor',
-      variant: 'destructive' as const,
-      label: '推奨しない',
-      bgColor: 'bg-red-500',
-      textColor: 'text-white',
-      icon: XCircle,
-      description: 'NPVが負でIRRが基準を大きく下回っています',
-    }
-  }
-}
-
-// 投資回収期間の計算
-const calculatePaybackPeriod = (cfEquity: number[]): number => {
-  const initialInvestment = Math.abs(cfEquity[0])
-  let cumulativeCF = 0
-
-  for (let t = 1; t < cfEquity.length - 1; t++) {
-    // 売却年は除く
-    cumulativeCF += cfEquity[t]
-    if (cumulativeCF >= initialInvestment) {
-      return t
-    }
-  }
-
-  return cfEquity.length - 1 // 売却時まで回収できない場合
-}
-
-const formatCurrency = (value: number) => {
-  const absValue = Math.abs(value)
-  const sign = value < 0 ? '-' : ''
-
-  if (absValue >= 100_000_000) {
-    // 1億円以上は億円単位で表示
-    return `${sign}${(absValue / 100_000_000).toFixed(1)}億円`
-  } else if (absValue >= 10_000) {
-    // 1万円以上は万円単位で表示
-    return `${sign}${(absValue / 10_000).toFixed(0)}万円`
-  } else {
-    // 1万円未満はそのまま表示
-    return `${sign}${absValue.toLocaleString()}円`
-  }
-}
-
-const formatPercent = (value: number) => {
-  return `${(value * 100).toFixed(2)}%`
-}
-
-// ヘルプテキスト用ヘルパーコンポーネントは ui/help-tooltip.tsx に移動
 
 export function DCFResultDisplay() {
   const result = useAtomValue(dcfResultAtom)
+  const currentError = useAtomValue(currentDCFErrorAtom)
+  const hasError = useAtomValue(hasCalculationErrorAtom)
   const discountAsset = useAtomValue(discountAssetAtom)
   const discountEquity = useAtomValue(discountEquityAtom)
+
+  // Show error state if calculation failed
+  if (hasError && currentError) {
+    return (
+      <Card className="border-destructive/50">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-destructive">
+            <AlertTriangle className="h-5 w-5" />
+            計算エラー
+          </CardTitle>
+          <CardDescription>
+            DCF計算中にエラーが発生しました
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ErrorList 
+            errors={[currentError]} 
+            warnings={[]} 
+            compact={false}
+          />
+        </CardContent>
+      </Card>
+    )
+  }
 
   if (!result) {
     return (
@@ -125,6 +70,9 @@ export function DCFResultDisplay() {
       </Card>
     )
   }
+
+  // Extract warnings from result
+  const warnings: DCFError[] = (result.warnings as DCFError[]) || []
 
   const _assetGrade = getInvestmentGrade(
     result.npvAsset,
@@ -140,6 +88,17 @@ export function DCFResultDisplay() {
 
   return (
     <div className="space-y-6">
+      {/* Display warnings if any */}
+      {warnings.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">計算時の警告</h3>
+          <ErrorList 
+            errors={[]} 
+            warnings={warnings} 
+            compact={true}
+          />
+        </div>
+      )}
       {/* メイン投資結果表示 */}
       <Card className="border-2">
         <CardHeader className="pb-4">
@@ -330,6 +289,11 @@ export function DCFResultDisplay() {
         <AlertDescription>
           この分析結果は概算値です。実際の投資判断には専門家にご相談ください。
           市場環境の変化、法制度の変更等により実際の収益は変動する可能性があります。
+          {warnings.length > 0 && (
+            <span className="block mt-2 font-medium">
+              上記の警告を確認し、必要に応じてパラメータを調整してください。
+            </span>
+          )}
         </AlertDescription>
       </Alert>
     </div>
