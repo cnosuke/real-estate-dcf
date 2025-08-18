@@ -1,7 +1,9 @@
 // Constrained numeric types for type safety
 export type Percentage = number & { readonly __brand: 'Percentage' } // [0, 1]
 export type PositiveNumber = number & { readonly __brand: 'PositiveNumber' } // > 0
-export type NonNegativeNumber = number & { readonly __brand: 'NonNegativeNumber' } // >= 0
+export type NonNegativeNumber = number & {
+  readonly __brand: 'NonNegativeNumber'
+} // >= 0
 export type Year = number & { readonly __brand: 'Year' } // >= 1
 export type Rate = number & { readonly __brand: 'Rate' } // >= 0
 

@@ -1,9 +1,9 @@
 import { Provider } from 'jotai'
 import { BrowserRouter, Route, Routes } from 'react-router'
+import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import { Layout } from '@/components/layout/Layout'
 import { DCFAnalysisPage } from '@/pages/DCFAnalysisPage'
 import { HomePage } from '@/pages/HomePage'
-import { ErrorBoundary } from '@/components/common/ErrorBoundary'
 import '@/styles/globals.css'
 
 export function App() {

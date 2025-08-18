@@ -3,7 +3,6 @@ import { useState } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { CalculationTrigger } from './calculation/CalculationTrigger'
 import {
   Dialog,
   DialogContent,
@@ -15,8 +14,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Textarea } from '@/components/ui/textarea'
 import {
   Table,
   TableBody,
@@ -25,6 +22,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import {
   Tooltip,
   TooltipContent,
@@ -32,8 +31,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import { useDCFDatasets } from '@/hooks/useDCFDatasets'
+import type {
+  ImportOptions,
+  ImportPreview,
+  ImportResult,
+} from '@/lib/dcf/dataset-storage'
 import type { DCFDataset } from '@/types/dcf'
-import type { ImportResult, ImportOptions, ImportPreview } from '@/lib/dcf/dataset-storage'
+import { CalculationTrigger } from './calculation/CalculationTrigger'
 import { formatNumber } from './shared/InputField'
 
 export function DCFInputFormHeader() {
@@ -63,7 +67,7 @@ export function DCFInputFormHeader() {
   const [datasetToDelete, setDatasetToDelete] = useState<DCFDataset | null>(
     null,
   )
-  
+
   // Import related state
   const [importMethod, setImportMethod] = useState<'file' | 'text'>('file')
   const [importText, setImportText] = useState('')
@@ -139,7 +143,9 @@ export function DCFInputFormHeader() {
   const handleCopyAllDatasets = async () => {
     const success = await copyAllDatasetsToClipboard()
     if (success) {
-      alert(`全データセット（${datasets.length}件）をクリップボードにコピーしました`)
+      alert(
+        `全データセット（${datasets.length}件）をクリップボードにコピーしました`,
+      )
     } else {
       alert('クリップボードへのコピーに失敗しました')
     }
@@ -163,13 +169,15 @@ export function DCFInputFormHeader() {
     setPreviewData(null)
   }
 
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = event.target.files?.[0]
     if (file) {
       if (file.type === 'application/json' || file.name.endsWith('.json')) {
         setImportFile(file)
         setImportError('')
-        
+
         // Generate preview
         try {
           const preview = await previewImportDataFromFile(file)
@@ -191,7 +199,7 @@ export function DCFInputFormHeader() {
 
   const handleTextChange = (text: string) => {
     setImportText(text)
-    
+
     if (text.trim()) {
       try {
         const preview = previewImportData(text)
@@ -220,7 +228,7 @@ export function DCFInputFormHeader() {
 
       // Check for "ask" option and handle duplicates interactively
       const options = { ...importOptions }
-      
+
       if (importMethod === 'file') {
         if (!importFile) {
           setImportError('ファイルを選択してください')
@@ -241,7 +249,9 @@ export function DCFInputFormHeader() {
       setImportDialogOpen(false)
       setImportResultDialogOpen(true)
     } catch (error) {
-      setImportError(error instanceof Error ? error.message : 'インポートに失敗しました')
+      setImportError(
+        error instanceof Error ? error.message : 'インポートに失敗しました',
+      )
     } finally {
       setImportProgress(false)
     }
@@ -267,7 +277,7 @@ export function DCFInputFormHeader() {
         <div className="flex gap-2">
           {/* 計算実行ボタン */}
           <CalculationTrigger variant="default" size="default" />
-          
+
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -426,7 +436,9 @@ export function DCFInputFormHeader() {
                                           <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => handleCopyDataset(dataset)}
+                                            onClick={() =>
+                                              handleCopyDataset(dataset)
+                                            }
                                             className="flex items-center gap-1"
                                           >
                                             <Copy className="h-3 w-3" />
@@ -500,8 +512,8 @@ export function DCFInputFormHeader() {
           <DialogHeader>
             <DialogTitle>全データセットを削除</DialogTitle>
             <DialogDescription>
-              保存されているすべてのデータセット（{datasets.length}件）を削除しますか？
-              この操作は取り消せません。
+              保存されているすべてのデータセット（{datasets.length}
+              件）を削除しますか？ この操作は取り消せません。
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -527,14 +539,19 @@ export function DCFInputFormHeader() {
               JSONファイルまたはテキストからデータセットを読み込みます
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
-            <Tabs value={importMethod} onValueChange={(value) => setImportMethod(value as 'file' | 'text')}>
+            <Tabs
+              value={importMethod}
+              onValueChange={(value) =>
+                setImportMethod(value as 'file' | 'text')
+              }
+            >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="file">ファイル選択</TabsTrigger>
                 <TabsTrigger value="text">テキスト入力</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="file" className="space-y-4">
                 <div>
                   <Label htmlFor="import-file">JSONファイル</Label>
@@ -552,7 +569,7 @@ export function DCFInputFormHeader() {
                   )}
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="text" className="space-y-4">
                 <div>
                   <Label htmlFor="import-text">JSONデータ</Label>
@@ -574,8 +591,8 @@ export function DCFInputFormHeader() {
                   importOptions.overwriteExisting
                     ? 'overwrite'
                     : importOptions.autoRename
-                    ? 'rename'
-                    : 'ask'
+                      ? 'rename'
+                      : 'ask'
                 }
                 onChange={(e) => {
                   const value = e.target.value
@@ -600,23 +617,31 @@ export function DCFInputFormHeader() {
                     <strong>検出:</strong> {previewData.count}件のデータセット
                     {previewData.structure !== 'invalid' && (
                       <span className="ml-2 text-muted-foreground">
-                        ({previewData.structure === 'single' ? '単一データセット' : 
-                          previewData.structure === 'multiple' ? '複数データセット(エクスポート形式)' : 
-                          previewData.structure === 'array' ? '配列形式' : '不明'})
+                        (
+                        {previewData.structure === 'single'
+                          ? '単一データセット'
+                          : previewData.structure === 'multiple'
+                            ? '複数データセット(エクスポート形式)'
+                            : previewData.structure === 'array'
+                              ? '配列形式'
+                              : '不明'}
+                        )
                       </span>
                     )}
                   </div>
-                  
+
                   {previewData.duplicateNames.length > 0 && (
                     <div className="text-orange-600">
-                      <strong>重複する名前:</strong> {previewData.duplicateNames.join(', ')}
+                      <strong>重複する名前:</strong>{' '}
+                      {previewData.duplicateNames.join(', ')}
                     </div>
                   )}
-                  
+
                   {previewData.errors.length > 0 && (
                     <div className="text-red-600">
                       <strong>エラー:</strong> {previewData.errors[0]}
-                      {previewData.errors.length > 1 && ` (他${previewData.errors.length - 1}件)`}
+                      {previewData.errors.length > 1 &&
+                        ` (他${previewData.errors.length - 1}件)`}
                     </div>
                   )}
                 </div>
@@ -634,8 +659,8 @@ export function DCFInputFormHeader() {
             <Button variant="outline" onClick={handleImportDialogClose}>
               キャンセル
             </Button>
-            <Button 
-              onClick={handleImport} 
+            <Button
+              onClick={handleImport}
               disabled={!canImport() || importProgress}
             >
               {importProgress ? 'インポート中...' : 'インポート'}
@@ -645,12 +670,15 @@ export function DCFInputFormHeader() {
       </Dialog>
 
       {/* インポート結果ダイアログ */}
-      <Dialog open={importResultDialogOpen} onOpenChange={setImportResultDialogOpen}>
+      <Dialog
+        open={importResultDialogOpen}
+        onOpenChange={setImportResultDialogOpen}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>インポート結果</DialogTitle>
           </DialogHeader>
-          
+
           {importResult && (
             <div className="space-y-4">
               {importResult.success ? (
@@ -659,17 +687,16 @@ export function DCFInputFormHeader() {
                   <AlertDescription>
                     {importResult.imported > 0
                       ? `${importResult.imported}件のデータセットをインポートしました`
-                      : 'インポートできるデータセットはありませんでした'
-                    }
-                    {importResult.skipped > 0 && ` (${importResult.skipped}件をスキップ)`}
-                    {importResult.duplicates.length > 0 && ` (${importResult.duplicates.length}件で名前重複)`}
+                      : 'インポートできるデータセットはありませんでした'}
+                    {importResult.skipped > 0 &&
+                      ` (${importResult.skipped}件をスキップ)`}
+                    {importResult.duplicates.length > 0 &&
+                      ` (${importResult.duplicates.length}件で名前重複)`}
                   </AlertDescription>
                 </Alert>
               ) : (
                 <Alert>
-                  <AlertDescription>
-                    インポートに失敗しました
-                  </AlertDescription>
+                  <AlertDescription>インポートに失敗しました</AlertDescription>
                 </Alert>
               )}
 
@@ -678,7 +705,9 @@ export function DCFInputFormHeader() {
                   <Label>エラー詳細:</Label>
                   <div className="text-sm bg-muted p-2 rounded max-h-32 overflow-auto">
                     {importResult.errors.map((error, index) => (
-                      <div key={index} className="text-red-600">{error}</div>
+                      <div key={index} className="text-red-600">
+                        {error}
+                      </div>
                     ))}
                   </div>
                 </div>

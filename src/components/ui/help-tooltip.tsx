@@ -14,12 +14,12 @@ interface HelpTooltipProps {
   className?: string
 }
 
-export function HelpTooltip({ 
-  title, 
-  content, 
-  maxWidth = "600px",
-  placement = "top",
-  className 
+export function HelpTooltip({
+  title,
+  content,
+  maxWidth = '600px',
+  placement = 'top',
+  className,
 }: HelpTooltipProps) {
   return (
     <TooltipProvider delayDuration={300}>
@@ -29,7 +29,7 @@ export function HelpTooltip({
             className={`h-4 w-4 text-muted-foreground hover:text-foreground cursor-help transition-colors ${className || 'ml-1'}`}
           />
         </TooltipTrigger>
-        <TooltipContent 
+        <TooltipContent
           side={placement}
           className="bg-white border border-border shadow-lg opacity-100 z-50 p-4"
           style={{ maxWidth }}

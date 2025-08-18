@@ -1,27 +1,26 @@
-import type { DebtYear, Input, Result } from '@/types/dcf'
-import { 
-  DCFError, 
-  DCFErrorType, 
-  ErrorSeverity,
+import {
+  DCFError,
   DCFErrorFactory,
   DCFErrorLogger,
-  logError 
-} from '@/lib/error-utils'
-import { DCFValidator } from './dcf-validator'
-import { DCF_CONFIG } from './config'
+  DCFErrorType,
+  ErrorSeverity,
+  logError,
+} from '@/lib/errors'
+import type { DebtYear, Input, Result } from '@/types/dcf'
+import { CALCULATION_CONFIG } from './calculation-config'
+import { DCFValidator } from '@/lib/validation'
 import { IRRCalculator } from './irr'
 
 const pow1p = (x: number, n: number) => (1 + x) ** n
 
 const annuityPayment = (principal: number, rate: number, years: number) => {
   if (principal <= 0 || years <= 0) return 0
-  if (Math.abs(rate) < DCF_CONFIG.CALCULATION.EPS) return principal / years
+  if (Math.abs(rate) < CALCULATION_CONFIG.EPS) return principal / years
   return (principal * rate) / (1 - (1 + rate) ** -years)
 }
 
 const npv = (rate: number, cfs: number[]) =>
   cfs.reduce((acc, cf, t) => acc + cf / (1 + rate) ** t, 0)
-
 
 function buildDebtSchedule(
   amount: number,
@@ -34,7 +33,7 @@ function buildDebtSchedule(
   let bal = amount
   const schedule: DebtYear[] = []
   for (let t = 1; t <= horizon; t++) {
-    if (t <= term && bal > DCF_CONFIG.CALCULATION.EPS) {
+    if (t <= term && bal > CALCULATION_CONFIG.EPS) {
       const interest = bal * rate
       const principal = Math.min(pay - interest, bal)
       const payment = interest + principal
@@ -65,7 +64,7 @@ function buildDebtSchedule(
 
 export function runDCF(input: Input): Result {
   const collectedWarnings: DCFError[] = []
-  
+
   try {
     // Validate input using unified validator
     const inputValidation = DCFValidator.validateInput(input)
@@ -76,7 +75,9 @@ export function runDCF(input: Input): Result {
     }
 
     // Validate business rules using unified validator
-    const businessValidation = DCFValidator.validateBusinessRules(inputValidation.value!)
+    const businessValidation = DCFValidator.validateBusinessRules(
+      inputValidation.value!,
+    )
     if (!businessValidation.isValid) {
       const error = businessValidation.errors[0] // Throw first critical error
       DCFErrorLogger.log(error, 'runDCF:businessRules')
@@ -84,7 +85,7 @@ export function runDCF(input: Input): Result {
     }
 
     // Collect warnings
-    businessValidation.warnings.forEach(warning => {
+    businessValidation.warnings.forEach((warning) => {
       DCFErrorLogger.log(warning, 'runDCF:businessRulesWarning')
       collectedWarnings.push(warning)
     })
@@ -120,13 +121,13 @@ export function runDCF(input: Input): Result {
       if (noi < 0 && t < N) {
         const warning = DCFErrorFactory.createWarning(
           DCFErrorType.UNREALISTIC_RESULT,
-          `${t}年目の${DCF_CONFIG.ERROR_MESSAGES.NEGATIVE_NOI}: ${noi.toLocaleString()}円`,
-          { 
+          `${t}年目のNOIがマイナスです: ${noi.toLocaleString()}円`,
+          {
             field: 'noi',
             value: noi,
             operation: 'cash_flow_calculation',
-            metadata: { year: t, egi, opex, tax }
-          }
+            metadata: { year: t, egi, opex, tax },
+          },
         )
         DCFErrorLogger.log(warning, 'runDCF:negativeNOI')
         collectedWarnings.push(warning)
@@ -140,22 +141,27 @@ export function runDCF(input: Input): Result {
 
     // 売却（価格パス）
     const pN = in_.p0 * pow1p(in_.inflation - in_.priceDecay, N) // 終価（コスト控除前）
-    
+
     // Check for unrealistic property value decline
     if (pN <= 0) {
       throw new DCFError(
         DCFErrorType.UNREALISTIC_RESULT,
         ErrorSeverity.ERROR,
-        `${DCF_CONFIG.ERROR_MESSAGES.NEGATIVE_SALE_PRICE}: ${pN.toLocaleString()}円`,
-        { 
+        `売却時の物件価格がゼロ以下になっています: ${pN.toLocaleString()}円`,
+        {
           field: 'salePrice',
           value: pN,
           operation: 'sale_price_calculation',
-          metadata: { initialPrice: in_.p0, priceDecay: in_.priceDecay, inflation: in_.inflation, years: N }
-        }
+          metadata: {
+            initialPrice: in_.p0,
+            priceDecay: in_.priceDecay,
+            inflation: in_.inflation,
+            years: N,
+          },
+        },
       )
     }
-    
+
     const saleNet = pN * (1 - in_.exitCostRate)
     const prepay = remaining * (in_.prepayPenaltyRate ?? 0)
 
@@ -167,40 +173,39 @@ export function runDCF(input: Input): Result {
     let npvEquity: number
     let irrAsset: number
     let irrEquity: number
-    
+
     try {
       npvAsset = npv(in_.discountAsset, cfAsset)
       npvEquity = npv(in_.discountEquity, cfEquity)
     } catch (error) {
-      throw DCFErrorFactory.createCalculationError(
-        'npv_calculation',
-        { 
-          originalError: error, 
-          discountAsset: in_.discountAsset, 
-          discountEquity: in_.discountEquity 
-        }
-      )
+      throw DCFErrorFactory.createCalculationError('npv_calculation', {
+        originalError: error,
+        discountAsset: in_.discountAsset,
+        discountEquity: in_.discountEquity,
+      })
     }
-    
+
     // IRR calculation using new strategy pattern approach
     const irrCalculator = new IRRCalculator()
-    
+
     const assetIRRResult = irrCalculator.calculate(cfAsset, 0.06)
     if (!assetIRRResult.converged) {
-      throw assetIRRResult.error || DCFErrorFactory.createIRRError(
-        'unknown',
-        cfAsset,
-        { cashFlowType: 'asset' }
+      throw (
+        assetIRRResult.error ||
+        DCFErrorFactory.createIRRError('unknown', cfAsset, {
+          cashFlowType: 'asset',
+        })
       )
     }
     irrAsset = assetIRRResult.value
-    
+
     const equityIRRResult = irrCalculator.calculate(cfEquity, 0.08)
     if (!equityIRRResult.converged) {
-      throw equityIRRResult.error || DCFErrorFactory.createIRRError(
-        'unknown',
-        cfEquity,
-        { cashFlowType: 'equity' }
+      throw (
+        equityIRRResult.error ||
+        DCFErrorFactory.createIRRError('unknown', cfEquity, {
+          cashFlowType: 'equity',
+        })
       )
     }
     irrEquity = equityIRRResult.value
@@ -219,18 +224,18 @@ export function runDCF(input: Input): Result {
       irrEquity,
       npvAsset,
       npvEquity,
-      implicitCap
+      implicitCap,
     }
-    
+
     const resultValidation = DCFValidator.validateResults(result)
-    
+
     // Collect result validation errors as warnings (don't fail the calculation)
-    resultValidation.errors.forEach(error => {
+    resultValidation.errors.forEach((error) => {
       DCFErrorLogger.log(error, 'runDCF:resultValidation')
       collectedWarnings.push(error)
     })
-    
-    resultValidation.warnings.forEach(warning => {
+
+    resultValidation.warnings.forEach((warning) => {
       DCFErrorLogger.log(warning, 'runDCF:resultValidationWarning')
       collectedWarnings.push(warning)
     })
@@ -252,18 +257,18 @@ export function runDCF(input: Input): Result {
     if (error instanceof DCFError) {
       throw error
     }
-    
+
     // Wrap unexpected errors
     const wrappedError = new DCFError(
       DCFErrorType.NUMERICAL_INSTABILITY,
       ErrorSeverity.CRITICAL,
-      `${DCF_CONFIG.ERROR_MESSAGES.UNEXPECTED_ERROR}: ${error instanceof Error ? error.message : String(error)}`,
-      { 
+      `予期しないエラーが発生しました: ${error instanceof Error ? error.message : String(error)}`,
+      {
         field: 'system',
         value: input,
         operation: 'dcf_calculation',
-        metadata: { originalError: error }
-      }
+        metadata: { originalError: error },
+      },
     )
     DCFErrorLogger.log(wrappedError, 'runDCF:unexpected')
     throw wrappedError

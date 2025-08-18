@@ -1,32 +1,57 @@
-import React, { useState } from 'react'
 import { useAtomValue } from 'jotai'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  AlertCircle,
+  AlertTriangle,
+  Calculator,
+  CheckCircle,
+  ChevronDown,
+  Info,
+  MinusCircle,
+  TrendingDown,
+  TrendingUp,
+  XCircle,
+} from 'lucide-react'
+import React, { useState } from 'react'
+import {
+  discountAssetAtom,
+  discountEquityAtom,
+} from '@/atoms/calculation/dcf-input'
+import {
+  currentDCFErrorAtom,
+  dcfResultAtom,
+  hasCalculationErrorAtom,
+} from '@/atoms/calculation/dcf-output'
+import { ErrorList } from '@/components/ui/errors'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  AlertCircle, 
-  Info, 
-  ChevronDown, 
-  Calculator,
-  AlertTriangle,
-  CheckCircle,
-  XCircle,
-  MinusCircle
-} from 'lucide-react'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { dcfResultAtom, currentDCFErrorAtom, hasCalculationErrorAtom } from '@/atoms/calculation/dcf-output'
-import { discountAssetAtom, discountEquityAtom } from '@/atoms/calculation/dcf-input'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { DCFError } from '@/lib/errors'
 import { formatCurrency, formatPercent } from '@/lib/format-utils'
-import { calculatePaybackPeriod, getInvestmentGrade } from '@/lib/investment-utils'
-import { RESULT_HELP_TEXTS, RESULT_FAQ, getResultHelpText } from '@/lib/result-help-texts'
-import { ErrorList } from '@/components/common/ErrorDisplay'
-import { DCFError } from '@/lib/error-utils'
+import {
+  calculatePaybackPeriod,
+  getInvestmentGrade,
+} from '@/lib/investment-utils'
+import {
+  getResultHelpText,
+  RESULT_FAQ,
+  RESULT_HELP_TEXTS,
+} from '@/lib/result-help-texts'
 import type { Result } from '@/types/dcf'
 
 export function DCFResultDisplay() {
@@ -47,11 +72,7 @@ export function DCFResultDisplay() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ErrorList 
-            errors={[currentError]} 
-            warnings={[]} 
-            compact={false}
-          />
+          <ErrorList errors={[currentError]} warnings={[]} compact={false} />
         </CardContent>
       </Card>
     )
@@ -91,7 +112,7 @@ export function DCFResultDisplay() {
             </div>
           </CardTitle>
         </CardHeader>
-        
+
         {showHelpDetails && (
           <CardContent>
             <Alert>
@@ -145,13 +166,18 @@ export function DCFResultDisplay() {
             {RESULT_FAQ.map((faq, index) => (
               <Collapsible key={index}>
                 <CollapsibleTrigger asChild>
-                  <Button variant="ghost" className="w-full justify-between text-left h-auto p-3">
+                  <Button
+                    variant="ghost"
+                    className="w-full justify-between text-left h-auto p-3"
+                  >
                     <span className="font-medium">{faq.question}</span>
                     <ChevronDown className="h-4 w-4" />
                   </Button>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="px-3 pb-3">
-                  <div className="text-sm text-muted-foreground">{faq.answer}</div>
+                  <div className="text-sm text-muted-foreground">
+                    {faq.answer}
+                  </div>
                 </CollapsibleContent>
               </Collapsible>
             ))}
@@ -166,8 +192,12 @@ export function DCFResultDisplay() {
 function InvestmentSummary({ result }: { result: Result }) {
   const discountAsset = useAtomValue(discountAssetAtom)
   const discountEquity = useAtomValue(discountEquityAtom)
-  const overallRating = calculateOverallRating(result, discountAsset, discountEquity)
-  
+  const overallRating = calculateOverallRating(
+    result,
+    discountAsset,
+    discountEquity,
+  )
+
   return (
     <div className="space-y-4">
       <Card>
@@ -182,7 +212,7 @@ function InvestmentSummary({ result }: { result: Result }) {
             <div className="text-sm text-muted-foreground">
               {overallRating.description}
             </div>
-            
+
             {/* 主要指標のサマリー */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <IndicatorCard
@@ -194,7 +224,9 @@ function InvestmentSummary({ result }: { result: Result }) {
               <IndicatorCard
                 title="IRR（資産）"
                 value={formatPercent(result.irrAsset)}
-                status={result.irrAsset > discountAsset ? 'positive' : 'negative'}
+                status={
+                  result.irrAsset > discountAsset ? 'positive' : 'negative'
+                }
                 helpText={RESULT_HELP_TEXTS.irrAsset}
               />
               <IndicatorCard
@@ -206,7 +238,9 @@ function InvestmentSummary({ result }: { result: Result }) {
               <IndicatorCard
                 title="IRR（エクイティ）"
                 value={formatPercent(result.irrEquity)}
-                status={result.irrEquity > discountEquity ? 'positive' : 'negative'}
+                status={
+                  result.irrEquity > discountEquity ? 'positive' : 'negative'
+                }
                 helpText={RESULT_HELP_TEXTS.irrEquity}
               />
             </div>
@@ -221,7 +255,9 @@ function InvestmentSummary({ result }: { result: Result }) {
                     <li>NPVがプラスの場合、理論的には投資価値があります</li>
                     <li>IRRが要求利回りを上回っているか確認しましょう</li>
                     <li>キャッシュフローの安定性も重要な要素です</li>
-                    <li>暗黙のキャップレートが市場相場と整合しているか確認しましょう</li>
+                    <li>
+                      暗黙のキャップレートが市場相場と整合しているか確認しましょう
+                    </li>
                   </ul>
                 </div>
               </AlertDescription>
@@ -252,7 +288,7 @@ function ProfitabilityAnalysis({ result }: { result: Result }) {
               <div className="p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">NPV（資産）</span>
-                  <HelpTooltip 
+                  <HelpTooltip
                     title={RESULT_HELP_TEXTS.npvAsset.title}
                     content={getResultHelpText('npvAsset')?.content || ''}
                   />
@@ -263,15 +299,17 @@ function ProfitabilityAnalysis({ result }: { result: Result }) {
                 <div className="text-xs text-muted-foreground mt-1">
                   基準利回り: {formatPercent(discountAsset)}
                 </div>
-                <div className={`text-sm mt-2 ${result.npvAsset > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div
+                  className={`text-sm mt-2 ${result.npvAsset > 0 ? 'text-green-600' : 'text-red-600'}`}
+                >
                   {result.npvAsset > 0 ? '投資価値あり' : '投資価値疑問'}
                 </div>
               </div>
-              
+
               <div className="p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">NPV（エクイティ）</span>
-                  <HelpTooltip 
+                  <HelpTooltip
                     title={RESULT_HELP_TEXTS.npvEquity.title}
                     content={getResultHelpText('npvEquity')?.content || ''}
                   />
@@ -282,8 +320,12 @@ function ProfitabilityAnalysis({ result }: { result: Result }) {
                 <div className="text-xs text-muted-foreground mt-1">
                   基準利回り: {formatPercent(discountEquity)}
                 </div>
-                <div className={`text-sm mt-2 ${result.npvEquity > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {result.npvEquity > 0 ? 'レバレッジ効果あり' : 'レバレッジ効果なし'}
+                <div
+                  className={`text-sm mt-2 ${result.npvEquity > 0 ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {result.npvEquity > 0
+                    ? 'レバレッジ効果あり'
+                    : 'レバレッジ効果なし'}
                 </div>
               </div>
             </div>
@@ -296,7 +338,7 @@ function ProfitabilityAnalysis({ result }: { result: Result }) {
               <div className="p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">IRR（資産）</span>
-                  <HelpTooltip 
+                  <HelpTooltip
                     title={RESULT_HELP_TEXTS.irrAsset.title}
                     content={getResultHelpText('irrAsset')?.content || ''}
                   />
@@ -307,15 +349,19 @@ function ProfitabilityAnalysis({ result }: { result: Result }) {
                 <div className="text-xs text-muted-foreground mt-1">
                   vs 基準利回り: {formatPercent(discountAsset)}
                 </div>
-                <div className={`text-sm mt-2 ${result.irrAsset > discountAsset ? 'text-green-600' : 'text-red-600'}`}>
-                  {result.irrAsset > discountAsset ? `+${formatPercent(result.irrAsset - discountAsset)} 超過` : `${formatPercent(discountAsset - result.irrAsset)} 不足`}
+                <div
+                  className={`text-sm mt-2 ${result.irrAsset > discountAsset ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {result.irrAsset > discountAsset
+                    ? `+${formatPercent(result.irrAsset - discountAsset)} 超過`
+                    : `${formatPercent(discountAsset - result.irrAsset)} 不足`}
                 </div>
               </div>
-              
+
               <div className="p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">IRR（エクイティ）</span>
-                  <HelpTooltip 
+                  <HelpTooltip
                     title={RESULT_HELP_TEXTS.irrEquity.title}
                     content={getResultHelpText('irrEquity')?.content || ''}
                   />
@@ -326,8 +372,12 @@ function ProfitabilityAnalysis({ result }: { result: Result }) {
                 <div className="text-xs text-muted-foreground mt-1">
                   vs 基準利回り: {formatPercent(discountEquity)}
                 </div>
-                <div className={`text-sm mt-2 ${result.irrEquity > discountEquity ? 'text-green-600' : 'text-red-600'}`}>
-                  {result.irrEquity > discountEquity ? `+${formatPercent(result.irrEquity - discountEquity)} 超過` : `${formatPercent(discountEquity - result.irrEquity)} 不足`}
+                <div
+                  className={`text-sm mt-2 ${result.irrEquity > discountEquity ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {result.irrEquity > discountEquity
+                    ? `+${formatPercent(result.irrEquity - discountEquity)} 超過`
+                    : `${formatPercent(discountEquity - result.irrEquity)} 不足`}
                 </div>
               </div>
             </div>
@@ -351,7 +401,9 @@ function CashFlowAnalysis({ result }: { result: Result }) {
         <CardContent className="space-y-6">
           {/* 年次キャッシュフロー */}
           <div>
-            <h4 className="text-lg font-semibold mb-3">年次キャッシュフロー推移</h4>
+            <h4 className="text-lg font-semibold mb-3">
+              年次キャッシュフロー推移
+            </h4>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -363,7 +415,9 @@ function CashFlowAnalysis({ result }: { result: Result }) {
               </TableHeader>
               <TableBody>
                 {result.cfAsset.map((assetCf, index) => {
-                  const cumulativeCf = result.cfEquity.slice(0, index + 1).reduce((sum, cf) => sum + cf, 0)
+                  const cumulativeCf = result.cfEquity
+                    .slice(0, index + 1)
+                    .reduce((sum, cf) => sum + cf, 0)
                   return (
                     <TableRow key={index}>
                       <TableCell className="font-medium">
@@ -373,12 +427,24 @@ function CashFlowAnalysis({ result }: { result: Result }) {
                         {formatCurrency(assetCf)}
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        <span className={result.cfEquity[index] >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        <span
+                          className={
+                            result.cfEquity[index] >= 0
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                          }
+                        >
                           {formatCurrency(result.cfEquity[index])}
                         </span>
                       </TableCell>
                       <TableCell className="text-right font-mono text-sm">
-                        <span className={cumulativeCf >= 0 ? 'text-green-600' : 'text-red-600'}>
+                        <span
+                          className={
+                            cumulativeCf >= 0
+                              ? 'text-green-600'
+                              : 'text-red-600'
+                          }
+                        >
                           {formatCurrency(cumulativeCf)}
                         </span>
                       </TableCell>
@@ -394,29 +460,44 @@ function CashFlowAnalysis({ result }: { result: Result }) {
             <h4 className="text-lg font-semibold mb-3">キャッシュフロー指標</h4>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="p-4 border rounded-lg">
-                <div className="text-sm text-muted-foreground mb-1">投資回収期間</div>
+                <div className="text-sm text-muted-foreground mb-1">
+                  投資回収期間
+                </div>
                 <div className="text-xl font-bold">{paybackPeriod}年</div>
-                <div className="text-xs text-muted-foreground mt-1">売却除く</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  売却除く
+                </div>
               </div>
-              
+
               <div className="p-4 border rounded-lg">
-                <div className="text-sm text-muted-foreground mb-1">平均年間CF</div>
+                <div className="text-sm text-muted-foreground mb-1">
+                  平均年間CF
+                </div>
                 <div className="text-xl font-bold">
                   {formatCurrency(
-                    result.cfEquity.slice(1, -1).reduce((sum, cf) => sum + cf, 0) / 
-                    Math.max(1, result.cfEquity.length - 2)
+                    result.cfEquity
+                      .slice(1, -1)
+                      .reduce((sum, cf) => sum + cf, 0) /
+                      Math.max(1, result.cfEquity.length - 2),
                   )}
                 </div>
-                <div className="text-xs text-muted-foreground mt-1">売却年除く</div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  売却年除く
+                </div>
               </div>
-              
+
               <div className="p-4 border rounded-lg">
-                <div className="text-sm text-muted-foreground mb-1">CF安定性</div>
+                <div className="text-sm text-muted-foreground mb-1">
+                  CF安定性
+                </div>
                 <div className="text-xl font-bold">
-                  {result.cfEquity.slice(1).every(cf => cf >= 0) ? '安定' : '要注意'}
+                  {result.cfEquity.slice(1).every((cf) => cf >= 0)
+                    ? '安定'
+                    : '要注意'}
                 </div>
                 <div className="text-xs text-muted-foreground mt-1">
-                  {result.cfEquity.slice(1).filter(cf => cf < 0).length}年マイナス
+                  {result.cfEquity.slice(1).filter((cf) => cf < 0).length}
+                  年マイナス
                 </div>
               </div>
             </div>
@@ -443,11 +524,7 @@ function DetailedAnalysis({ result }: { result: Result }) {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <ErrorList 
-              errors={[]} 
-              warnings={warnings} 
-              compact={false}
-            />
+            <ErrorList errors={[]} warnings={warnings} compact={false} />
           </CardContent>
         </Card>
       )}
@@ -464,7 +541,7 @@ function DetailedAnalysis({ result }: { result: Result }) {
               <div className="p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">売却純額</span>
-                  <HelpTooltip 
+                  <HelpTooltip
                     title={RESULT_HELP_TEXTS.salePriceNet.title}
                     content={getResultHelpText('salePriceNet')?.content || ''}
                   />
@@ -473,40 +550,46 @@ function DetailedAnalysis({ result }: { result: Result }) {
                   {formatCurrency(result.salePriceNet)}
                 </div>
               </div>
-              
+
               <div className="p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">売却時残債</span>
-                  <HelpTooltip 
+                  <HelpTooltip
                     title={RESULT_HELP_TEXTS.remainingDebtAtExit.title}
-                    content={getResultHelpText('remainingDebtAtExit')?.content || ''}
+                    content={
+                      getResultHelpText('remainingDebtAtExit')?.content || ''
+                    }
                   />
                 </div>
                 <div className="text-xl font-bold">
                   {formatCurrency(result.remainingDebtAtExit)}
                 </div>
               </div>
-              
+
               <div className="p-4 border rounded-lg">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium">残債比率</span>
                   <HelpTooltip content="売却純額に対する残債の比率。50%以下が理想的。" />
                 </div>
                 <div className="text-xl font-bold">
-                  {result.salePriceNet > 0 
-                    ? formatPercent(result.remainingDebtAtExit / result.salePriceNet)
-                    : 'N/A'
-                  }
+                  {result.salePriceNet > 0
+                    ? formatPercent(
+                        result.remainingDebtAtExit / result.salePriceNet,
+                      )
+                    : 'N/A'}
                 </div>
-                <div className={`text-xs mt-1 ${
-                  result.salePriceNet > 0 && (result.remainingDebtAtExit / result.salePriceNet) <= 0.5
-                    ? 'text-green-600' 
-                    : 'text-yellow-600'
-                }`}>
-                  {result.salePriceNet > 0 && (result.remainingDebtAtExit / result.salePriceNet) <= 0.5
+                <div
+                  className={`text-xs mt-1 ${
+                    result.salePriceNet > 0 &&
+                    result.remainingDebtAtExit / result.salePriceNet <= 0.5
+                      ? 'text-green-600'
+                      : 'text-yellow-600'
+                  }`}
+                >
+                  {result.salePriceNet > 0 &&
+                  result.remainingDebtAtExit / result.salePriceNet <= 0.5
                     ? '良好'
-                    : '要注意'
-                  }
+                    : '要注意'}
                 </div>
               </div>
             </div>
@@ -517,8 +600,10 @@ function DetailedAnalysis({ result }: { result: Result }) {
             <h4 className="text-lg font-semibold mb-3">市場整合性チェック</h4>
             <div className="p-4 border rounded-lg">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-medium">暗黙のキャップレート</span>
-                <HelpTooltip 
+                <span className="text-sm font-medium">
+                  暗黙のキャップレート
+                </span>
+                <HelpTooltip
                   title={RESULT_HELP_TEXTS.implicitCap.title}
                   content={getResultHelpText('implicitCap')?.content || ''}
                 />
@@ -548,31 +633,47 @@ interface IndicatorCardProps {
 function IndicatorCard({ title, value, status, helpText }: IndicatorCardProps) {
   const getStatusIcon = () => {
     switch (status) {
-      case 'positive': return <CheckCircle className="h-4 w-4 text-green-600" />
-      case 'negative': return <XCircle className="h-4 w-4 text-red-600" />
-      default: return <MinusCircle className="h-4 w-4 text-yellow-600" />
+      case 'positive':
+        return <CheckCircle className="h-4 w-4 text-green-600" />
+      case 'negative':
+        return <XCircle className="h-4 w-4 text-red-600" />
+      default:
+        return <MinusCircle className="h-4 w-4 text-yellow-600" />
     }
   }
 
   const getStatusColor = () => {
     switch (status) {
-      case 'positive': return 'border-green-200 bg-green-50'
-      case 'negative': return 'border-red-200 bg-red-50'
-      default: return 'border-yellow-200 bg-yellow-50'
+      case 'positive':
+        return 'border-green-200 bg-green-50'
+      case 'negative':
+        return 'border-red-200 bg-red-50'
+      default:
+        return 'border-yellow-200 bg-yellow-50'
     }
   }
 
   return (
     <div className={`p-3 rounded-lg border ${getStatusColor()}`}>
       <div className="flex items-center justify-between mb-1">
-        <span className="text-xs font-medium text-muted-foreground">{title}</span>
+        <span className="text-xs font-medium text-muted-foreground">
+          {title}
+        </span>
         <div className="flex items-center gap-1">
           {getStatusIcon()}
-          <HelpTooltip 
+          <HelpTooltip
             title={helpText.title}
-            content={getResultHelpText(title.includes('資産') ? 'npvAsset' : 
-                    title.includes('エクイティ') ? 'npvEquity' : 
-                    title.includes('IRR') && title.includes('資産') ? 'irrAsset' : 'irrEquity')?.content || ''}
+            content={
+              getResultHelpText(
+                title.includes('資産')
+                  ? 'npvAsset'
+                  : title.includes('エクイティ')
+                    ? 'npvEquity'
+                    : title.includes('IRR') && title.includes('資産')
+                      ? 'irrAsset'
+                      : 'irrEquity',
+              )?.content || ''
+            }
           />
         </div>
       </div>
@@ -582,39 +683,47 @@ function IndicatorCard({ title, value, status, helpText }: IndicatorCardProps) {
 }
 
 // 総合評価の計算
-function calculateOverallRating(result: Result, discountAsset: number, discountEquity: number) {
+function calculateOverallRating(
+  result: Result,
+  discountAsset: number,
+  discountEquity: number,
+) {
   const scores = {
     npvAsset: result.npvAsset > 0 ? 1 : 0,
     npvEquity: result.npvEquity > 0 ? 1 : 0,
     irrAsset: result.irrAsset > discountAsset ? 1 : 0,
     irrEquity: result.irrEquity > discountEquity ? 1 : 0,
   }
-  
-  const totalScore = Object.values(scores).reduce((sum, score) => sum + score, 0)
-  
+
+  const totalScore = Object.values(scores).reduce(
+    (sum, score) => sum + score,
+    0,
+  )
+
   if (totalScore >= 4) {
     return {
       label: '優良',
       variant: 'default' as const,
-      description: '全ての主要指標が良好で、投資価値の高い物件です。'
+      description: '全ての主要指標が良好で、投資価値の高い物件です。',
     }
   } else if (totalScore >= 3) {
     return {
       label: '良好',
       variant: 'secondary' as const,
-      description: 'おおむね良好な指標ですが、一部注意が必要な要素があります。'
+      description: 'おおむね良好な指標ですが、一部注意が必要な要素があります。',
     }
   } else if (totalScore >= 2) {
     return {
       label: '要検討',
       variant: 'outline' as const,
-      description: '投資価値はありますが、リスクを慎重に検討する必要があります。'
+      description:
+        '投資価値はありますが、リスクを慎重に検討する必要があります。',
     }
   } else {
     return {
       label: '要注意',
       variant: 'destructive' as const,
-      description: '投資価値に疑問があります。条件の見直しを検討してください。'
+      description: '投資価値に疑問があります。条件の見直しを検討してください。',
     }
   }
 }

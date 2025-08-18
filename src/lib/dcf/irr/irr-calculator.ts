@@ -1,8 +1,8 @@
-import { DCFError, DCFErrorFactory } from '@/lib/error-utils'
-import { DCF_CONFIG } from '../config'
-import { NewtonRaphsonIRRStrategy } from './newton-raphson-strategy'
+import { type DCFError, DCFErrorFactory } from '@/lib/errors'
+import { CALCULATION_CONFIG } from '../calculation-config'
 import { BisectionIRRStrategy } from './bisection-strategy'
 import { GridSearchIRRStrategy } from './grid-search-strategy'
+import { NewtonRaphsonIRRStrategy } from './newton-raphson-strategy'
 
 /**
  * IRR calculation result
@@ -35,7 +35,7 @@ export class IRRCalculator {
     this.strategies = [
       new NewtonRaphsonIRRStrategy(),
       new BisectionIRRStrategy(),
-      new GridSearchIRRStrategy()
+      new GridSearchIRRStrategy(),
     ]
   }
 
@@ -51,7 +51,7 @@ export class IRRCalculator {
         value: NaN,
         method: 'validation',
         converged: false,
-        error: validationError
+        error: validationError,
       }
     }
 
@@ -64,10 +64,7 @@ export class IRRCalculator {
         if (result.converged && this.isValidIRR(result.value)) {
           return result
         }
-      } catch (error) {
-        // If this strategy fails, try the next one
-        continue
-      }
+      } catch (error) {}
     }
 
     // All strategies failed
@@ -76,26 +73,26 @@ export class IRRCalculator {
       method: 'failed',
       converged: false,
       error: DCFErrorFactory.createIRRError('all_methods', cashFlows, {
-        attemptedMethods: this.strategies.map(s => s.getName())
-      })
+        attemptedMethods: this.strategies.map((s) => s.getName()),
+      }),
     }
   }
 
   private validateCashFlows(cashFlows: number[]): DCFError | null {
     if (!cashFlows || cashFlows.length === 0) {
       return DCFErrorFactory.createIRRError('validation', cashFlows, {
-        reason: 'empty_cash_flows'
+        reason: 'empty_cash_flows',
       })
     }
 
-    const positiveCount = cashFlows.filter(cf => cf > 0).length
-    const negativeCount = cashFlows.filter(cf => cf < 0).length
-    
+    const positiveCount = cashFlows.filter((cf) => cf > 0).length
+    const negativeCount = cashFlows.filter((cf) => cf < 0).length
+
     if (positiveCount === 0 || negativeCount === 0) {
       return DCFErrorFactory.createIRRError('validation', cashFlows, {
         reason: 'no_sign_change',
         positiveCount,
-        negativeCount
+        negativeCount,
       })
     }
 

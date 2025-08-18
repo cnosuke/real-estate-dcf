@@ -1,5 +1,5 @@
-import type { DCFDataset, Input } from '@/types/dcf'
 import { validateInput } from '@/lib/type-guards'
+import type { DCFDataset, Input } from '@/types/dcf'
 
 // Storage keys for new architecture
 const STORAGE_KEYS = {
@@ -38,7 +38,7 @@ interface StorageInfo {
 // Initialize storage system and perform migration if needed
 function initializeStorage(): void {
   const currentVersion = getStorageVersion()
-  
+
   if (currentVersion === 0) {
     // First time or legacy data - perform migration
     migrateFromLegacy()
@@ -70,7 +70,7 @@ function getMetadata(): DatasetMetadata {
         totalCount: 0,
       }
     }
-    
+
     const metadata = JSON.parse(stored)
     if (
       metadata &&
@@ -85,7 +85,7 @@ function getMetadata(): DatasetMetadata {
   } catch {
     // Fall through to return default
   }
-  
+
   return {
     version: CURRENT_STORAGE_VERSION,
     datasetIds: [],
@@ -101,7 +101,7 @@ function updateMetadata(datasetIds: string[]): void {
     lastModified: new Date().toISOString(),
     totalCount: datasetIds.length,
   }
-  
+
   localStorage.setItem(STORAGE_KEYS.metadata, JSON.stringify(metadata))
 }
 
@@ -115,18 +115,20 @@ function generateId(): string {
 
 export function saveDataset(name: string, input: Input): DCFDataset {
   initializeStorage()
-  
+
   // Validate input before saving
   const validation = validateInput(input)
   if (!validation.isValid) {
-    const errorMessages = validation.errors.map(e => `${e.field}: ${e.message}`).join(', ')
+    const errorMessages = validation.errors
+      .map((e) => `${e.field}: ${e.message}`)
+      .join(', ')
     throw new Error(`Invalid input for dataset "${name}": ${errorMessages}`)
   }
 
   const metadata = getMetadata()
   const existingDatasets = getDatasets()
-  const existingDataset = existingDatasets.find(d => d.name === name)
-  
+  const existingDataset = existingDatasets.find((d) => d.name === name)
+
   const dataset: VersionedDataset = {
     id: existingDataset?.id || generateId(),
     name,
@@ -138,13 +140,13 @@ export function saveDataset(name: string, input: Input): DCFDataset {
   try {
     // Save individual dataset
     localStorage.setItem(getDatasetKey(dataset.id), JSON.stringify(dataset))
-    
+
     // Update metadata
-    const newDatasetIds = existingDataset 
-      ? metadata.datasetIds 
+    const newDatasetIds = existingDataset
+      ? metadata.datasetIds
       : [...metadata.datasetIds, dataset.id]
     updateMetadata(newDatasetIds)
-    
+
     return {
       id: dataset.id,
       name: dataset.name,
@@ -152,17 +154,19 @@ export function saveDataset(name: string, input: Input): DCFDataset {
       input: dataset.input,
     }
   } catch (error) {
-    throw new Error(`Failed to save dataset "${name}": ${error instanceof Error ? error.message : 'Unknown error'}`)
+    throw new Error(
+      `Failed to save dataset "${name}": ${error instanceof Error ? error.message : 'Unknown error'}`,
+    )
   }
 }
 
 export function getDatasets(): DCFDataset[] {
   initializeStorage()
-  
+
   const metadata = getMetadata()
   const validDatasets: DCFDataset[] = []
   const invalidDatasetIds: string[] = []
-  
+
   for (const datasetId of metadata.datasetIds) {
     try {
       const stored = localStorage.getItem(getDatasetKey(datasetId))
@@ -170,7 +174,7 @@ export function getDatasets(): DCFDataset[] {
         invalidDatasetIds.push(datasetId)
         continue
       }
-      
+
       const dataset = JSON.parse(stored) as VersionedDataset
       if (
         dataset &&
@@ -198,12 +202,14 @@ export function getDatasets(): DCFDataset[] {
       invalidDatasetIds.push(datasetId)
     }
   }
-  
+
   // Clean up invalid datasets from metadata
   if (invalidDatasetIds.length > 0) {
-    const validIds = metadata.datasetIds.filter(id => !invalidDatasetIds.includes(id))
+    const validIds = metadata.datasetIds.filter(
+      (id) => !invalidDatasetIds.includes(id),
+    )
     updateMetadata(validIds)
-    
+
     // Remove invalid dataset storage entries
     for (const invalidId of invalidDatasetIds) {
       try {
@@ -215,17 +221,17 @@ export function getDatasets(): DCFDataset[] {
   }
 
   return validDatasets.sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   )
 }
 
 export function getDataset(id: string): DCFDataset | null {
   initializeStorage()
-  
+
   try {
     const stored = localStorage.getItem(getDatasetKey(id))
     if (!stored) return null
-    
+
     const dataset = JSON.parse(stored) as VersionedDataset
     if (
       dataset &&
@@ -248,28 +254,30 @@ export function getDataset(id: string): DCFDataset | null {
   } catch {
     // Fall through to return null
   }
-  
+
   return null
 }
 
 export function deleteDataset(id: string): boolean {
   initializeStorage()
-  
+
   try {
     const metadata = getMetadata()
     const index = metadata.datasetIds.indexOf(id)
-    
+
     if (index === -1) {
       return false // Dataset not found
     }
-    
+
     // Remove from storage
     localStorage.removeItem(getDatasetKey(id))
-    
+
     // Update metadata
-    const newDatasetIds = metadata.datasetIds.filter(datasetId => datasetId !== id)
+    const newDatasetIds = metadata.datasetIds.filter(
+      (datasetId) => datasetId !== id,
+    )
     updateMetadata(newDatasetIds)
-    
+
     return true
   } catch {
     return false
@@ -278,10 +286,10 @@ export function deleteDataset(id: string): boolean {
 
 export function deleteAllDatasets(): boolean {
   initializeStorage()
-  
+
   try {
     const metadata = getMetadata()
-    
+
     // Remove all individual dataset entries
     for (const datasetId of metadata.datasetIds) {
       try {
@@ -290,10 +298,10 @@ export function deleteAllDatasets(): boolean {
         // Continue even if individual deletion fails
       }
     }
-    
+
     // Clear metadata
     updateMetadata([])
-    
+
     return true
   } catch {
     return false
@@ -305,7 +313,7 @@ export function exportDatasetAsJson(id: string): string {
   if (!dataset) {
     throw new Error(`Dataset with id "${id}" not found`)
   }
-  
+
   return JSON.stringify(dataset, null, 2)
 }
 
@@ -316,7 +324,7 @@ export function exportAllDatasetsAsJson(): string {
     exportedAt: new Date().toISOString(),
     datasets,
   }
-  
+
   return JSON.stringify(exportData, null, 2)
 }
 
@@ -326,14 +334,14 @@ export function migrateFromLegacy(): boolean {
     if (!legacyData) {
       return true // No legacy data to migrate
     }
-    
+
     const legacyDatasets = JSON.parse(legacyData)
     if (!Array.isArray(legacyDatasets)) {
       return true // Invalid legacy data
     }
-    
+
     const migratedIds: string[] = []
-    
+
     for (const legacyDataset of legacyDatasets) {
       if (
         legacyDataset &&
@@ -356,9 +364,12 @@ export function migrateFromLegacy(): boolean {
               migratedAt: new Date().toISOString(),
             },
           }
-          
+
           try {
-            localStorage.setItem(getDatasetKey(versionedDataset.id), JSON.stringify(versionedDataset))
+            localStorage.setItem(
+              getDatasetKey(versionedDataset.id),
+              JSON.stringify(versionedDataset),
+            )
             migratedIds.push(versionedDataset.id)
           } catch {
             // Continue with other datasets even if one fails
@@ -366,13 +377,13 @@ export function migrateFromLegacy(): boolean {
         }
       }
     }
-    
+
     // Update metadata with migrated datasets
     updateMetadata(migratedIds)
-    
+
     // Remove legacy storage key
     localStorage.removeItem(STORAGE_KEYS.datasets)
-    
+
     return true
   } catch {
     return false
@@ -381,10 +392,10 @@ export function migrateFromLegacy(): boolean {
 
 export function getStorageInfo(): StorageInfo {
   initializeStorage()
-  
+
   const metadata = getMetadata()
   let totalSizeEstimate = 0
-  
+
   // Estimate total storage size
   try {
     for (const datasetId of metadata.datasetIds) {
@@ -393,15 +404,16 @@ export function getStorageInfo(): StorageInfo {
         totalSizeEstimate += stored.length * 2 // UTF-16 encoding approximation
       }
     }
-    
-    const metadataSize = localStorage.getItem(STORAGE_KEYS.metadata)?.length || 0
+
+    const metadataSize =
+      localStorage.getItem(STORAGE_KEYS.metadata)?.length || 0
     totalSizeEstimate += metadataSize * 2
   } catch {
     // Ignore size calculation errors
   }
-  
+
   const legacyData = localStorage.getItem(STORAGE_KEYS.datasets)
-  
+
   return {
     storageVersion: getStorageVersion(),
     totalDatasets: metadata.totalCount,
@@ -443,7 +455,7 @@ export function detectJsonStructure(jsonData: unknown): JsonStructure {
     if (jsonData.length === 0) {
       return 'array'
     }
-    
+
     const firstItem = jsonData[0]
     if (isDatasetLike(firstItem)) {
       return 'array'
@@ -454,7 +466,11 @@ export function detectJsonStructure(jsonData: unknown): JsonStructure {
   const obj = jsonData as Record<string, unknown>
 
   // Check for multiple datasets format (export format)
-  if (obj.datasets && Array.isArray(obj.datasets) && typeof obj.version === 'number') {
+  if (
+    obj.datasets &&
+    Array.isArray(obj.datasets) &&
+    typeof obj.version === 'number'
+  ) {
     return 'multiple'
   }
 
@@ -476,13 +492,16 @@ function isDatasetLike(obj: unknown): boolean {
     typeof dataset.id === 'string' &&
     typeof dataset.name === 'string' &&
     typeof dataset.createdAt === 'string' &&
-    dataset.input &&
+    !!dataset.input &&
     typeof dataset.input === 'object'
   )
 }
 
 // Validate dataset structure
-export function validateDatasetStructure(data: unknown): { isValid: boolean, errors: string[] } {
+export function validateDatasetStructure(data: unknown): {
+  isValid: boolean
+  errors: string[]
+} {
   const errors: string[] = []
 
   if (!data || typeof data !== 'object') {
@@ -509,7 +528,9 @@ export function validateDatasetStructure(data: unknown): { isValid: boolean, err
   } else {
     const validation = validateInput(dataset.input)
     if (!validation.isValid) {
-      errors.push(`入力データが無効です: ${validation.errors.map(e => e.message).join(', ')}`)
+      errors.push(
+        `入力データが無効です: ${validation.errors.map((e) => e.message).join(', ')}`,
+      )
     }
   }
 
@@ -529,13 +550,16 @@ function generateUniqueName(baseName: string, existingNames: string[]): string {
 }
 
 // Import single dataset
-export function importSingleDataset(data: unknown, options: ImportOptions = {}): ImportResult {
+export function importSingleDataset(
+  data: unknown,
+  options: ImportOptions = {},
+): ImportResult {
   const result: ImportResult = {
     success: false,
     imported: 0,
     skipped: 0,
     errors: [],
-    duplicates: []
+    duplicates: [],
   }
 
   try {
@@ -547,8 +571,10 @@ export function importSingleDataset(data: unknown, options: ImportOptions = {}):
 
     const dataset = data as DCFDataset
     const existingDatasets = getDatasets()
-    const existingNames = existingDatasets.map(d => d.name)
-    const existingDataset = existingDatasets.find(d => d.name === dataset.name)
+    const existingNames = existingDatasets.map((d) => d.name)
+    const existingDataset = existingDatasets.find(
+      (d) => d.name === dataset.name,
+    )
 
     if (existingDataset) {
       result.duplicates.push(dataset.name)
@@ -583,13 +609,16 @@ export function importSingleDataset(data: unknown, options: ImportOptions = {}):
 }
 
 // Import multiple datasets
-export function importMultipleDatasets(data: unknown, options: ImportOptions = {}): ImportResult {
+export function importMultipleDatasets(
+  data: unknown,
+  options: ImportOptions = {},
+): ImportResult {
   const result: ImportResult = {
     success: true,
     imported: 0,
     skipped: 0,
     errors: [],
-    duplicates: []
+    duplicates: [],
   }
 
   try {
@@ -597,19 +626,20 @@ export function importMultipleDatasets(data: unknown, options: ImportOptions = {
     let datasets: unknown[] = []
 
     switch (structure) {
-      case 'multiple':
+      case 'multiple': {
         const exportData = data as { datasets: unknown[] }
         datasets = exportData.datasets
         break
-      
+      }
+
       case 'array':
         datasets = data as unknown[]
         break
-      
+
       case 'single':
         datasets = [data]
         break
-      
+
       default:
         result.errors.push('無効なJSON構造です')
         result.success = false
@@ -618,7 +648,7 @@ export function importMultipleDatasets(data: unknown, options: ImportOptions = {
 
     for (const dataset of datasets) {
       const singleResult = importSingleDataset(dataset, options)
-      
+
       result.imported += singleResult.imported
       result.skipped += singleResult.skipped
       result.errors.push(...singleResult.errors)
@@ -637,13 +667,16 @@ export function importMultipleDatasets(data: unknown, options: ImportOptions = {
 }
 
 // Main import function
-export function importDatasetsFromJson(jsonString: string, options: ImportOptions = {}): ImportResult {
+export function importDatasetsFromJson(
+  jsonString: string,
+  options: ImportOptions = {},
+): ImportResult {
   const result: ImportResult = {
     success: false,
     imported: 0,
     skipped: 0,
     errors: [],
-    duplicates: []
+    duplicates: [],
   }
 
   try {
@@ -658,7 +691,9 @@ export function importDatasetsFromJson(jsonString: string, options: ImportOption
     if (error instanceof SyntaxError) {
       result.errors.push('無効なJSON形式です')
     } else {
-      result.errors.push(error instanceof Error ? error.message : 'Unknown error')
+      result.errors.push(
+        error instanceof Error ? error.message : 'Unknown error',
+      )
     }
     return result
   }
@@ -679,7 +714,7 @@ export function previewImportData(jsonString: string): ImportPreview {
     count: 0,
     structure: 'invalid',
     errors: [],
-    duplicateNames: []
+    duplicateNames: [],
   }
 
   try {
@@ -695,27 +730,28 @@ export function previewImportData(jsonString: string): ImportPreview {
     let datasets: unknown[] = []
 
     switch (structure) {
-      case 'multiple':
+      case 'multiple': {
         const exportData = jsonData as { datasets: unknown[] }
         datasets = exportData.datasets
         break
-      
+      }
+
       case 'array':
         datasets = jsonData as unknown[]
         break
-      
+
       case 'single':
         datasets = [jsonData]
         break
-      
+
       default:
         preview.errors.push('無効なJSON構造です')
         return preview
     }
 
     const existingDatasets = getDatasets()
-    const existingNames = existingDatasets.map(d => d.name)
-    
+    const existingNames = existingDatasets.map((d) => d.name)
+
     let validCount = 0
     for (const dataset of datasets) {
       const validation = validateDatasetStructure(dataset)
@@ -736,7 +772,9 @@ export function previewImportData(jsonString: string): ImportPreview {
     if (error instanceof SyntaxError) {
       preview.errors.push('無効なJSON形式です')
     } else {
-      preview.errors.push(error instanceof Error ? error.message : 'Unknown error')
+      preview.errors.push(
+        error instanceof Error ? error.message : 'Unknown error',
+      )
     }
   }
 

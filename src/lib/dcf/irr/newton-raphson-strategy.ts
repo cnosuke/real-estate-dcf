@@ -1,5 +1,5 @@
-import { DCF_CONFIG } from '../config'
-import { DCFErrorFactory } from '@/lib/error-utils'
+import { DCFErrorFactory } from '@/lib/errors'
+import { CALCULATION_CONFIG } from '../calculation-config'
 import type { IRRCalculationStrategy, IRRResult } from './irr-calculator'
 
 /**
@@ -19,14 +19,14 @@ export class NewtonRaphsonIRRStrategy implements IRRCalculationStrategy {
   calculate(cashFlows: number[], initialGuess = 0.08): IRRResult {
     let r = initialGuess
     let lastR = Number.POSITIVE_INFINITY
-    const maxIterations = DCF_CONFIG.CALCULATION.MAX_IRR_ITERATIONS
-    const tolerance = DCF_CONFIG.CALCULATION.IRR_TOLERANCE
-    
+    const maxIterations = CALCULATION_CONFIG.MAX_IRR_ITERATIONS
+    const tolerance = CALCULATION_CONFIG.IRR_TOLERANCE
+
     for (let i = 0; i < maxIterations; i++) {
       const { npv, derivative } = this.calculateNPVAndDerivative(cashFlows, r)
-      
+
       // Check for near-zero derivative (critical point)
-      if (Math.abs(derivative) < DCF_CONFIG.CALCULATION.DERIVATIVE_TOLERANCE) {
+      if (Math.abs(derivative) < CALCULATION_CONFIG.DERIVATIVE_TOLERANCE) {
         return {
           value: NaN,
           method: this.getName(),
@@ -35,23 +35,23 @@ export class NewtonRaphsonIRRStrategy implements IRRCalculationStrategy {
           error: DCFErrorFactory.createIRRError(this.getName(), cashFlows, {
             reason: 'derivative_near_zero',
             iteration: i,
-            derivative
-          })
+            derivative,
+          }),
         }
       }
-      
+
       const newR = r - npv / derivative
-      
+
       // Convergence check
       if (Number.isFinite(newR) && Math.abs(newR - r) < tolerance) {
         return {
           value: newR,
           method: this.getName(),
           iterations: i + 1,
-          converged: true
+          converged: true,
         }
       }
-      
+
       // Oscillation check
       if (Math.abs(newR - lastR) < tolerance) {
         return {
@@ -64,11 +64,11 @@ export class NewtonRaphsonIRRStrategy implements IRRCalculationStrategy {
             iteration: i,
             currentR: r,
             newR,
-            lastR
-          })
+            lastR,
+          }),
         }
       }
-      
+
       // Divergence check
       if (!Number.isFinite(newR) || Math.abs(newR) > 100) {
         return {
@@ -79,11 +79,11 @@ export class NewtonRaphsonIRRStrategy implements IRRCalculationStrategy {
           error: DCFErrorFactory.createIRRError(this.getName(), cashFlows, {
             reason: 'divergence',
             iteration: i,
-            newR
-          })
+            newR,
+          }),
         }
       }
-      
+
       lastR = r
       r = newR
     }
@@ -94,34 +94,37 @@ export class NewtonRaphsonIRRStrategy implements IRRCalculationStrategy {
       iterations: maxIterations,
       converged: false,
       error: DCFErrorFactory.createIRRError(this.getName(), cashFlows, {
-        reason: 'max_iterations_reached'
-      })
+        reason: 'max_iterations_reached',
+      }),
     }
   }
 
-  private calculateNPVAndDerivative(cashFlows: number[], rate: number): { npv: number; derivative: number } {
+  private calculateNPVAndDerivative(
+    cashFlows: number[],
+    rate: number,
+  ): { npv: number; derivative: number } {
     let npv = 0
     let derivative = 0
-    
+
     for (let t = 0; t < cashFlows.length; t++) {
-      const powerTerm = Math.pow(1 + rate, t)
-      
+      const powerTerm = (1 + rate) ** t
+
       if (!Number.isFinite(powerTerm) || powerTerm <= 0) {
         throw DCFErrorFactory.createCalculationError('npv_derivative', {
           rate,
           period: t,
-          powerTerm
+          powerTerm,
         })
       }
-      
+
       npv += cashFlows[t] / powerTerm
-      
+
       // Calculate derivative more carefully
       if (t > 0) {
         derivative -= (t * cashFlows[t]) / (powerTerm * (1 + rate))
       }
     }
-    
+
     return { npv, derivative }
   }
 }

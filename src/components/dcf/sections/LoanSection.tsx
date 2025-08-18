@@ -1,19 +1,29 @@
-import React from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
-import { ChevronDown } from 'lucide-react'
-import { InputField } from '../shared/InputField'
-import { useDCFForm } from '../providers/DCFFormProvider'
 import { useAtomValue, useSetAtom } from 'jotai'
+import { ChevronDown } from 'lucide-react'
+import React from 'react'
 import { loanSectionExpandedAtom, toggleSectionAtom } from '@/atoms/ui'
-import { getSectionHelpText } from '@/lib/help-texts'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui/collapsible'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
+import { getSectionHelpText } from '@/lib/help-texts'
+import { useDCFForm } from '../providers/DCFFormProvider'
+import { InputField } from '../shared/InputField'
 
 export function LoanSection() {
   const { input } = useDCFForm()
   const isExpanded = useAtomValue(loanSectionExpandedAtom)
   const toggleSection = useSetAtom(toggleSectionAtom)
-  
+
   const sectionHelp = getSectionHelpText('loan')
 
   return (
@@ -24,12 +34,14 @@ export function LoanSection() {
             <CardTitle className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {sectionHelp.title}
-                <HelpTooltip 
+                <HelpTooltip
                   title={sectionHelp.title}
                   content={`${sectionHelp.description}\n\n${sectionHelp.detail}`}
                 />
               </div>
-              <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+              <ChevronDown
+                className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
+              />
             </CardTitle>
             <CardDescription>{sectionHelp.description}</CardDescription>
           </CardHeader>
@@ -65,7 +77,7 @@ export function LoanSection() {
               <InputField
                 fieldName="prepayPenaltyRate"
                 label="繰上償還ペナルティ率"
-                value={input.prepayPenaltyRate}
+                value={input.prepayPenaltyRate ?? 0}
                 onChange={() => {}}
                 type="percentage"
                 step={0.001}

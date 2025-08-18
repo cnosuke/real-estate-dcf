@@ -1,22 +1,19 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
+import { dcfInputAtom, updateDCFInputAtom } from '@/atoms/calculation/dcf-input'
 import {
-  dcfInputAtom,
-  updateDCFInputAtom
-} from '@/atoms/calculation/dcf-input'
-import {
-  deleteDataset,
   deleteAllDatasets,
+  deleteDataset,
   exportAllDatasetsAsJson,
   exportDatasetAsJson,
   getDatasets,
   hasDatasetWithName,
-  saveDataset,
-  importDatasetsFromJson,
-  previewImportData,
-  type ImportResult,
   type ImportOptions,
   type ImportPreview,
+  type ImportResult,
+  importDatasetsFromJson,
+  previewImportData,
+  saveDataset,
 } from '@/lib/dcf/dataset-storage'
 import type { DCFDataset, Input } from '@/types/dcf'
 
@@ -96,7 +93,10 @@ export function useDCFDatasets() {
     }
   }
 
-  const importDatasetsFromJsonString = (jsonString: string, options?: ImportOptions): ImportResult => {
+  const importDatasetsFromJsonString = (
+    jsonString: string,
+    options?: ImportOptions,
+  ): ImportResult => {
     const result = importDatasetsFromJson(jsonString, options)
     if (result.imported > 0) {
       refreshDatasets()
@@ -114,7 +114,7 @@ export function useDCFDatasets() {
         imported: 0,
         skipped: 0,
         errors: [error instanceof Error ? error.message : 'Unknown error'],
-        duplicates: []
+        duplicates: [],
       }
     }
   }
@@ -123,7 +123,9 @@ export function useDCFDatasets() {
     return previewImportData(jsonString)
   }
 
-  const previewImportDataFromFile = async (file: File): Promise<ImportPreview> => {
+  const previewImportDataFromFile = async (
+    file: File,
+  ): Promise<ImportPreview> => {
     try {
       const text = await file.text()
       return previewImportData(text)
@@ -133,7 +135,7 @@ export function useDCFDatasets() {
         count: 0,
         structure: 'invalid',
         errors: [error instanceof Error ? error.message : 'Unknown error'],
-        duplicateNames: []
+        duplicateNames: [],
       }
     }
   }

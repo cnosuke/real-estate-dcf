@@ -1,19 +1,30 @@
-import type { Input, Percentage, PositiveNumber, NonNegativeNumber, Rate, Year } from '@/types/dcf'
-import { DCF_CONFIG } from '@/lib/dcf/config'
+import { VALIDATION_CONFIG } from '@/lib/validation/config'
+import type {
+  Input,
+  NonNegativeNumber,
+  Percentage,
+  PositiveNumber,
+  Rate,
+  Year,
+} from '@/types/dcf'
 
 /**
  * Type guard for Percentage (0 <= value <= 1)
  * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
-export function isPercentage(value: number): value is Percentage {
-  return Number.isFinite(value) && value >= DCF_CONFIG.VALIDATION.MIN_PERCENTAGE && value <= DCF_CONFIG.VALIDATION.MAX_PERCENTAGE
+function isPercentage(value: number): value is Percentage {
+  return (
+    Number.isFinite(value) &&
+    value >= VALIDATION_CONFIG.MIN_PERCENTAGE &&
+    value <= VALIDATION_CONFIG.MAX_PERCENTAGE
+  )
 }
 
 /**
  * Type guard for PositiveNumber (value > 0)
  * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
-export function isPositiveNumber(value: number): value is PositiveNumber {
+function isPositiveNumber(value: number): value is PositiveNumber {
   return Number.isFinite(value) && value > 0
 }
 
@@ -21,7 +32,7 @@ export function isPositiveNumber(value: number): value is PositiveNumber {
  * Type guard for NonNegativeNumber (value >= 0)
  * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
-export function isNonNegativeNumber(value: number): value is NonNegativeNumber {
+function isNonNegativeNumber(value: number): value is NonNegativeNumber {
   return Number.isFinite(value) && value >= 0
 }
 
@@ -29,22 +40,26 @@ export function isNonNegativeNumber(value: number): value is NonNegativeNumber {
  * Type guard for Year (value >= 1)
  * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
-export function isYear(value: number): value is Year {
-  return Number.isInteger(value) && value >= DCF_CONFIG.VALIDATION.MIN_YEARS && value <= DCF_CONFIG.VALIDATION.MAX_YEARS
+function isYear(value: number): value is Year {
+  return (
+    Number.isInteger(value) &&
+    value >= VALIDATION_CONFIG.MIN_YEARS &&
+    value <= VALIDATION_CONFIG.MAX_YEARS
+  )
 }
 
 /**
  * Type guard for Rate (value >= 0)
  * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
-export function isRate(value: number): value is Rate {
-  return Number.isFinite(value) && value >= DCF_CONFIG.VALIDATION.MIN_RATE
+function isRate(value: number): value is Rate {
+  return Number.isFinite(value) && value >= VALIDATION_CONFIG.MIN_RATE
 }
 
 /**
  * Validation error details
  */
-export interface ValidationError {
+interface ValidationError {
   field: string
   value: unknown
   message: string
@@ -57,7 +72,7 @@ export class TypeValidationResult<T> {
   constructor(
     public readonly isValid: boolean,
     public readonly value: T | null = null,
-    public readonly errors: ValidationError[] = []
+    public readonly errors: ValidationError[] = [],
   ) {}
 
   static success<T>(value: T): TypeValidationResult<T> {
@@ -76,7 +91,7 @@ export class TypeValidationResult<T> {
 export function validateInput(input: unknown): TypeValidationResult<Input> {
   if (typeof input !== 'object' || input === null) {
     return TypeValidationResult.failure([
-      { field: 'input', value: input, message: 'Input must be an object' }
+      { field: 'input', value: input, message: 'Input must be an object' },
     ])
   }
 
@@ -88,13 +103,13 @@ export function validateInput(input: unknown): TypeValidationResult<Input> {
     fieldName: string,
     value: unknown,
     validator: (val: number) => val is number,
-    description: string
+    description: string,
   ): number | undefined => {
     if (typeof value !== 'number') {
       errors.push({
         field: fieldName,
         value,
-        message: `${fieldName} must be a number`
+        message: `${fieldName} must be a number`,
       })
       return undefined
     }
@@ -103,7 +118,7 @@ export function validateInput(input: unknown): TypeValidationResult<Input> {
       errors.push({
         field: fieldName,
         value,
-        message: `${fieldName} must be ${description}`
+        message: `${fieldName} must be ${description}`,
       })
       return undefined
     }
@@ -112,33 +127,118 @@ export function validateInput(input: unknown): TypeValidationResult<Input> {
   }
 
   // Validate required positive number fields
-  const p0 = validateField('p0', obj.p0, (val): val is number => isPositiveNumber(val), 'a positive number')
-  const i0 = validateField('i0', obj.i0, (val): val is number => isPositiveNumber(val), 'a positive number')
-  const rentMonthly0 = validateField('rentMonthly0', obj.rentMonthly0, (val): val is number => isPositiveNumber(val), 'a positive number')
-  const monthlyOpex0 = validateField('monthlyOpex0', obj.monthlyOpex0, (val): val is number => isPositiveNumber(val), 'a positive number')
-  const taxAnnualFixed = validateField('taxAnnualFixed', obj.taxAnnualFixed, (val): val is number => isPositiveNumber(val), 'a positive number')
-  const loanAmount = validateField('loanAmount', obj.loanAmount, (val): val is number => isNonNegativeNumber(val), 'a non-negative number')
+  const p0 = validateField(
+    'p0',
+    obj.p0,
+    (val): val is number => isPositiveNumber(val),
+    'a positive number',
+  )
+  const i0 = validateField(
+    'i0',
+    obj.i0,
+    (val): val is number => isPositiveNumber(val),
+    'a positive number',
+  )
+  const rentMonthly0 = validateField(
+    'rentMonthly0',
+    obj.rentMonthly0,
+    (val): val is number => isPositiveNumber(val),
+    'a positive number',
+  )
+  const monthlyOpex0 = validateField(
+    'monthlyOpex0',
+    obj.monthlyOpex0,
+    (val): val is number => isPositiveNumber(val),
+    'a positive number',
+  )
+  const taxAnnualFixed = validateField(
+    'taxAnnualFixed',
+    obj.taxAnnualFixed,
+    (val): val is number => isPositiveNumber(val),
+    'a positive number',
+  )
+  const loanAmount = validateField(
+    'loanAmount',
+    obj.loanAmount,
+    (val): val is number => isNonNegativeNumber(val),
+    'a non-negative number',
+  )
 
   // Validate percentage fields
-  const vacancy = validateField('vacancy', obj.vacancy, (val): val is number => isPercentage(val), 'between 0 and 1')
-  const exitCostRate = validateField('exitCostRate', obj.exitCostRate, (val): val is number => isPercentage(val), 'between 0 and 1')
+  const vacancy = validateField(
+    'vacancy',
+    obj.vacancy,
+    (val): val is number => isPercentage(val),
+    'between 0 and 1',
+  )
+  const exitCostRate = validateField(
+    'exitCostRate',
+    obj.exitCostRate,
+    (val): val is number => isPercentage(val),
+    'between 0 and 1',
+  )
 
   // Validate rate fields
-  const inflation = validateField('inflation', obj.inflation, (val): val is number => isRate(val), 'a non-negative number')
-  const rentDecay = validateField('rentDecay', obj.rentDecay, (val): val is number => isRate(val), 'a non-negative number')
-  const priceDecay = validateField('priceDecay', obj.priceDecay, (val): val is number => isRate(val), 'a non-negative number')
-  const discountAsset = validateField('discountAsset', obj.discountAsset, (val): val is number => isRate(val), 'a non-negative number')
-  const discountEquity = validateField('discountEquity', obj.discountEquity, (val): val is number => isRate(val), 'a non-negative number')
-  const loanRate = validateField('loanRate', obj.loanRate, (val): val is number => isRate(val), 'a non-negative number')
+  const inflation = validateField(
+    'inflation',
+    obj.inflation,
+    (val): val is number => isRate(val),
+    'a non-negative number',
+  )
+  const rentDecay = validateField(
+    'rentDecay',
+    obj.rentDecay,
+    (val): val is number => isRate(val),
+    'a non-negative number',
+  )
+  const priceDecay = validateField(
+    'priceDecay',
+    obj.priceDecay,
+    (val): val is number => isRate(val),
+    'a non-negative number',
+  )
+  const discountAsset = validateField(
+    'discountAsset',
+    obj.discountAsset,
+    (val): val is number => isRate(val),
+    'a non-negative number',
+  )
+  const discountEquity = validateField(
+    'discountEquity',
+    obj.discountEquity,
+    (val): val is number => isRate(val),
+    'a non-negative number',
+  )
+  const loanRate = validateField(
+    'loanRate',
+    obj.loanRate,
+    (val): val is number => isRate(val),
+    'a non-negative number',
+  )
 
   // Validate year fields
-  const years = validateField('years', obj.years, (val): val is number => isYear(val), 'an integer >= 1')
-  const loanTerm = validateField('loanTerm', obj.loanTerm, (val): val is number => isYear(val), 'an integer >= 1')
+  const years = validateField(
+    'years',
+    obj.years,
+    (val): val is number => isYear(val),
+    'an integer >= 1',
+  )
+  const loanTerm = validateField(
+    'loanTerm',
+    obj.loanTerm,
+    (val): val is number => isYear(val),
+    'an integer >= 1',
+  )
 
   // Validate optional prepayPenaltyRate
   let prepayPenaltyRate: number | undefined
   if (obj.prepayPenaltyRate !== undefined) {
-    prepayPenaltyRate = validateField('prepayPenaltyRate', obj.prepayPenaltyRate, (val): val is number => isPercentage(val), 'between 0 and 1')
+    prepayPenaltyRate = validateField(
+      'prepayPenaltyRate',
+      obj.prepayPenaltyRate,
+      (val): val is number => isPercentage(val),
+      'between 0 and 1',
+    )
   }
 
   if (errors.length > 0) {
@@ -163,7 +263,7 @@ export function validateInput(input: unknown): TypeValidationResult<Input> {
     loanAmount: loanAmount!,
     loanRate: loanRate!,
     loanTerm: loanTerm!,
-    ...(prepayPenaltyRate !== undefined && { prepayPenaltyRate })
+    ...(prepayPenaltyRate !== undefined && { prepayPenaltyRate }),
   }
 
   return TypeValidationResult.success(validatedInput)
@@ -173,38 +273,47 @@ export function validateInput(input: unknown): TypeValidationResult<Input> {
  * Simple type guard for backward compatibility
  * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
-export function isValidInput(input: unknown): input is Input {
+function isValidInput(input: unknown): input is Input {
   return validateInput(input).isValid
 }
 
 /**
  * Type assertion functions that throw on invalid input
  */
-export function assertPercentage(value: number, fieldName: string): asserts value is Percentage {
+function assertPercentage(
+  value: number,
+  fieldName: string,
+): asserts value is Percentage {
   if (!isPercentage(value)) {
     throw new Error(`${fieldName} must be between 0 and 1, got ${value}`)
   }
 }
 
-export function assertPositiveNumber(value: number, fieldName: string): asserts value is PositiveNumber {
+function assertPositiveNumber(
+  value: number,
+  fieldName: string,
+): asserts value is PositiveNumber {
   if (!isPositiveNumber(value)) {
     throw new Error(`${fieldName} must be a positive number, got ${value}`)
   }
 }
 
-export function assertNonNegativeNumber(value: number, fieldName: string): asserts value is NonNegativeNumber {
+function assertNonNegativeNumber(
+  value: number,
+  fieldName: string,
+): asserts value is NonNegativeNumber {
   if (!isNonNegativeNumber(value)) {
     throw new Error(`${fieldName} must be a non-negative number, got ${value}`)
   }
 }
 
-export function assertYear(value: number, fieldName: string): asserts value is Year {
+function assertYear(value: number, fieldName: string): asserts value is Year {
   if (!isYear(value)) {
     throw new Error(`${fieldName} must be an integer >= 1, got ${value}`)
   }
 }
 
-export function assertRate(value: number, fieldName: string): asserts value is Rate {
+function assertRate(value: number, fieldName: string): asserts value is Rate {
   if (!isRate(value)) {
     throw new Error(`${fieldName} must be a non-negative number, got ${value}`)
   }
@@ -213,27 +322,27 @@ export function assertRate(value: number, fieldName: string): asserts value is R
 /**
  * Safe type casting functions for creating constrained types
  */
-export function toPercentage(value: number): Percentage {
+function toPercentage(value: number): Percentage {
   assertPercentage(value, 'value')
   return value as Percentage
 }
 
-export function toPositiveNumber(value: number): PositiveNumber {
+function toPositiveNumber(value: number): PositiveNumber {
   assertPositiveNumber(value, 'value')
   return value as PositiveNumber
 }
 
-export function toNonNegativeNumber(value: number): NonNegativeNumber {
+function toNonNegativeNumber(value: number): NonNegativeNumber {
   assertNonNegativeNumber(value, 'value')
   return value as NonNegativeNumber
 }
 
-export function toYear(value: number): Year {
+function toYear(value: number): Year {
   assertYear(value, 'value')
   return value as Year
 }
 
-export function toRate(value: number): Rate {
+function toRate(value: number): Rate {
   assertRate(value, 'value')
   return value as Rate
 }

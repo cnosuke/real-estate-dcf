@@ -1,38 +1,35 @@
-import React, { createContext, useContext, ReactNode } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { 
-  dcfInputAtom, 
-  updateDCFInputAtom
-} from '@/atoms/calculation/dcf-input'
+import React, { createContext, type ReactNode, useContext } from 'react'
+import { dcfInputAtom, updateDCFInputAtom } from '@/atoms/calculation/dcf-input'
 import {
-  inputErrorsAtom,
-  inputWarningsAtom,
-  hasInputErrorsAtom,
-  hasInputWarningsAtom
-} from '@/atoms/ui/validation'
-import {
+  autoCalculateDCFAtom,
   executeDCFCalculationAtom,
   isCalculatingAtom,
-  autoCalculateDCFAtom
 } from '@/atoms/calculation/dcf-output'
+import {
+  hasInputErrorsAtom,
+  hasInputWarningsAtom,
+  inputErrorsAtom,
+  inputWarningsAtom,
+} from '@/atoms/ui/validation'
+import type { DCFError } from '@/lib/errors'
 import type { Input } from '@/types/dcf'
-import type { DCFError } from '@/lib/error-utils'
 
 interface DCFFormContextValue {
   // 入力値管理
   input: Input
   updateInput: (updates: Partial<Input>) => void
-  
+
   // バリデーション状態
   errors: DCFError[]
   warnings: DCFError[]
   hasErrors: boolean
   hasWarnings: boolean
-  
+
   // 計算処理
   executeCalculation: () => void
   isCalculating: boolean
-  
+
   // フィールド固有のメソッド
   getFieldError: (fieldName: string) => DCFError | undefined
   hasFieldError: (fieldName: string) => boolean
@@ -45,7 +42,10 @@ interface DCFFormProviderProps {
   autoCalculate?: boolean
 }
 
-export function DCFFormProvider({ children, autoCalculate = true }: DCFFormProviderProps) {
+export function DCFFormProvider({
+  children,
+  autoCalculate = true,
+}: DCFFormProviderProps) {
   const input = useAtomValue(dcfInputAtom)
   const updateInput = useSetAtom(updateDCFInputAtom)
   const errors = useAtomValue(inputErrorsAtom)
@@ -61,13 +61,22 @@ export function DCFFormProvider({ children, autoCalculate = true }: DCFFormProvi
     }
   }, [input, hasErrors, autoCalculate, executeCalculation])
 
-  const getFieldError = React.useCallback((fieldName: string): DCFError | undefined => {
-    return errors.find(error => error.context?.field === fieldName)
-  }, [errors])
+  const getFieldError = React.useCallback(
+    (fieldName: string): DCFError | undefined => {
+      const fieldError = errors.find(
+        (error) => error.context?.field === fieldName,
+      )
+      return fieldError
+    },
+    [errors],
+  )
 
-  const hasFieldError = React.useCallback((fieldName: string): boolean => {
-    return getFieldError(fieldName) !== undefined
-  }, [getFieldError])
+  const hasFieldError = React.useCallback(
+    (fieldName: string): boolean => {
+      return getFieldError(fieldName) !== undefined
+    },
+    [getFieldError],
+  )
 
   const contextValue: DCFFormContextValue = {
     input,
@@ -79,7 +88,7 @@ export function DCFFormProvider({ children, autoCalculate = true }: DCFFormProvi
     executeCalculation,
     isCalculating,
     getFieldError,
-    hasFieldError
+    hasFieldError,
   }
 
   return (

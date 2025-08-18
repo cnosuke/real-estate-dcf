@@ -1,12 +1,12 @@
 /**
  * Formats a number as Japanese currency with appropriate units
- * 
+ *
  * @param value - The monetary value in Japanese Yen
  * @returns Formatted currency string with appropriate units (円, 万円, 億円)
- * 
+ *
  * @example
  * formatCurrency(5000) // "5,000円"
- * formatCurrency(150000) // "15万円"  
+ * formatCurrency(150000) // "15万円"
  * formatCurrency(250000000) // "2.5億円"
  * formatCurrency(-100000) // "-10万円"
  */
@@ -37,10 +37,10 @@ export function formatCurrency(value: number): string {
 
 /**
  * Formats a decimal rate as a percentage with 2 decimal places
- * 
+ *
  * @param value - The rate as a decimal (e.g., 0.05 for 5%)
  * @returns Formatted percentage string
- * 
+ *
  * @example
  * formatPercent(0.05) // "5.00%"
  * formatPercent(0.1234) // "12.34%"

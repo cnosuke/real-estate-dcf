@@ -1,9 +1,14 @@
-import React, { Component, type ReactNode } from 'react'
 import { AlertTriangle, RefreshCw } from 'lucide-react'
+import React, { Component, type ReactNode } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DCFError, DCFErrorType, generateErrorMessage, logError } from '@/lib/error-utils'
+import {
+  DCFError,
+  DCFErrorType,
+  getErrorMessage,
+  logError,
+} from '@/lib/errors'
 
 interface Props {
   children: ReactNode
@@ -29,14 +34,14 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     this.setState({ errorInfo })
-    
+
     // Log the error
     if (error instanceof DCFError) {
       logError(error, 'ErrorBoundary')
     } else {
       console.error('Uncaught error in ErrorBoundary:', error, errorInfo)
     }
-    
+
     // Call custom error handler if provided
     this.props.onError?.(error, errorInfo)
   }
@@ -54,14 +59,16 @@ export class ErrorBoundary extends Component<Props, State> {
 
       const { error } = this.state
       const isDCFError = error instanceof DCFError
-      const errorMessage = isDCFError 
-        ? generateErrorMessage(error as DCFError)
+      const errorMessage = isDCFError
+        ? (error as DCFError).message || getErrorMessage((error as DCFError).type)
         : 'アプリケーションでエラーが発生しました'
 
-      const isUserError = isDCFError && [
-        DCFErrorType.INVALID_INPUT,
-        DCFErrorType.BUSINESS_RULE_VIOLATION
-      ].includes((error as DCFError).type)
+      const isUserError =
+        isDCFError &&
+        [
+          DCFErrorType.INVALID_INPUT,
+          DCFErrorType.BUSINESS_RULE_VIOLATION,
+        ].includes((error as DCFError).type)
 
       return (
         <Card className="border-destructive/50 bg-destructive/5">
@@ -74,9 +81,7 @@ export class ErrorBoundary extends Component<Props, State> {
           <CardContent className="space-y-4">
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                {errorMessage}
-              </AlertDescription>
+              <AlertDescription>{errorMessage}</AlertDescription>
             </Alert>
 
             {isDCFError && (error as DCFError).field && (
@@ -86,7 +91,7 @@ export class ErrorBoundary extends Component<Props, State> {
             )}
 
             <div className="flex gap-2">
-              <Button 
+              <Button
                 onClick={this.handleRetry}
                 variant="outline"
                 size="sm"
@@ -95,9 +100,9 @@ export class ErrorBoundary extends Component<Props, State> {
                 <RefreshCw className="h-4 w-4" />
                 再試行
               </Button>
-              
+
               {!isUserError && (
-                <Button 
+                <Button
                   onClick={() => window.location.reload()}
                   variant="secondary"
                   size="sm"
@@ -134,7 +139,7 @@ export class ErrorBoundary extends Component<Props, State> {
 export function withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   fallback?: ReactNode,
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void,
 ) {
   return function WithErrorBoundaryComponent(props: P) {
     return (

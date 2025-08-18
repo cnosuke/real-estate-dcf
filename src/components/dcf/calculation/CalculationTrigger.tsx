@@ -1,6 +1,6 @@
-import React from 'react'
-import { Button } from '@/components/ui/button'
 import { Calculator, Loader2 } from 'lucide-react'
+import type React from 'react'
+import { Button } from '@/components/ui/button'
 import { useDCFForm } from '../providers/DCFFormProvider'
 
 interface CalculationTriggerProps {
@@ -10,11 +10,11 @@ interface CalculationTriggerProps {
   children?: React.ReactNode
 }
 
-export function CalculationTrigger({ 
-  variant = 'default', 
+export function CalculationTrigger({
+  variant = 'default',
   size = 'default',
   className,
-  children 
+  children,
 }: CalculationTriggerProps) {
   const { executeCalculation, isCalculating, hasErrors } = useDCFForm()
 
