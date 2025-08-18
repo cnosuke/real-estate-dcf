@@ -29,21 +29,6 @@ export class BusinessRuleValidator {
   private static validateLoanRules(input: Input) {
     const warnings = []
 
-    if (input.loanAmount > input.p0 * 1.2) {
-      warnings.push(
-        DCFErrorFactory.createBusinessRuleWarning(
-          'loanAmount',
-          input.loanAmount,
-          '借入額が物件価格の120%を超えています。高いレバレッジとなります',
-          {
-            propertyPrice: input.p0,
-            loanAmount: input.loanAmount,
-            maxLoanAmount: input.p0 * 1.2,
-          },
-        ),
-      )
-    }
-
     if (input.loanAmount > 0 && input.loanTerm < input.years) {
       warnings.push(
         DCFErrorFactory.createBusinessRuleWarning(
@@ -56,12 +41,12 @@ export class BusinessRuleValidator {
     }
 
     const ltv = input.loanAmount / (input.p0 + input.i0)
-    if (ltv > 0.9) {
+    if (ltv > 1.2) {
       warnings.push(
         DCFErrorFactory.createBusinessRuleWarning(
           'loanAmount',
           ltv,
-          'LTV(借入比率)が90%を超えています。高いレバレッジとなります',
+          'LTV(借入比率)が120%を超えています。高いレバレッジとなります',
           { ltv, loanAmount: input.loanAmount, totalCost: input.p0 + input.i0 },
         ),
       )
