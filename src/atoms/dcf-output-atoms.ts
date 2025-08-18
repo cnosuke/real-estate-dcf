@@ -1,7 +1,12 @@
+/**
+ * @deprecated This file is being migrated to the new atom structure.
+ * Please use atoms from '@/atoms/calculation' instead.
+ * This file will be removed in a future version.
+ */
 import { atom } from 'jotai'
 import { runDCF } from '@/lib/dcf'
 import type { Result } from '@/types/dcf'
-import { DCFError, logError, DCFErrorType } from '@/lib/error-utils'
+import { DCFError, logError, DCFErrorType, ErrorSeverity } from '@/lib/error-utils'
 import { dcfInputAtom } from './dcf-input-atoms'
 
 // Result state container
@@ -31,10 +36,9 @@ export const dcfResultStateAtom = atom<DCFResultState>((get) => {
       // Handle unexpected errors
       dcfError = new DCFError(
         DCFErrorType.NUMERICAL_INSTABILITY,
+        ErrorSeverity.ERROR,
         `Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
-        undefined,
-        undefined,
-        { originalError: error }
+        { metadata: { originalError: error } }
       )
     }
     

@@ -1,33 +1,63 @@
-import { useAtom } from 'jotai'
-import { exitCostRateAtom, yearsAtom } from '@/atoms/dcf-input-atoms'
-import { formatPercent, InputField } from '../shared/InputField'
+import React from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
+import { ChevronDown } from 'lucide-react'
+import { InputField } from '../shared/InputField'
+import { useDCFForm } from '../providers/DCFFormProvider'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { holdingSaleSectionExpandedAtom, toggleSectionAtom } from '@/atoms/ui'
+import { getSectionHelpText } from '@/lib/help-texts'
+import { HelpTooltip } from '@/components/ui/help-tooltip'
 
 export function HoldingSaleSection() {
-  const [years, setYears] = useAtom(yearsAtom)
-  const [exitCostRate, setExitCostRate] = useAtom(exitCostRateAtom)
+  const { input } = useDCFForm()
+  const isExpanded = useAtomValue(holdingSaleSectionExpandedAtom)
+  const toggleSection = useSetAtom(toggleSectionAtom)
+  
+  const sectionHelp = getSectionHelpText('holdingSale')
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium">保有・売却条件</h3>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <InputField
-          label="保有年数"
-          value={years}
-          onChange={setYears}
-          step="1"
-          min="1"
-          helpText="不動産を保有する期間です。この期間経過後に物件を売却することを前提として、NPV・IRRを計算します。一般的には5-10年で設定することが多いです。"
-          formatDisplay={`現在: ${years}年`}
-        />
-        <InputField
-          label="売却コスト率"
-          value={exitCostRate}
-          onChange={setExitCostRate}
-          step="0.001"
-          helpText="物件売却時に発生する費用の割合です。仲介手数料（3%+6万円）、登記費用、印紙税等が含まれます。売却価格に対して4-6%程度が一般的です。"
-          formatDisplay={`現在: ${formatPercent(exitCostRate)}`}
-        />
-      </div>
-    </div>
+    <Collapsible open={isExpanded} onOpenChange={() => toggleSection('holdingSale')}>
+      <Card>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer hover:bg-muted/50">
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                {sectionHelp.title}
+                <HelpTooltip 
+                  title={sectionHelp.title}
+                  content={`${sectionHelp.description}\n\n${sectionHelp.detail}`}
+                />
+              </div>
+              <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            </CardTitle>
+            <CardDescription>{sectionHelp.description}</CardDescription>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <InputField
+                fieldName="years"
+                label="保有年数"
+                value={input.years}
+                onChange={(value) => {}}
+                step={1}
+                min={1}
+                unit="年"
+              />
+              <InputField
+                fieldName="exitCostRate"
+                label="売却コスト率"
+                value={input.exitCostRate}
+                onChange={(value) => {}}
+                type="percentage"
+                step={0.001}
+              />
+            </div>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   )
 }

@@ -90,7 +90,7 @@ export {
   createPresetFromCurrentInputAtom,
   // 後方互換性
   currentPresetAtom,
-  applyLegacyPresetAtom,
+  applyLegacyPresetAtom as applyPresetAtom_Legacy,
   applyLocationPresetAtom,
   applyPropertyTypePresetAtom,
   isCurrentPresetValidAtom,

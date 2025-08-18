@@ -1,72 +1,31 @@
-import { useAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import {
-  discountAssetAtom,
-  discountEquityAtom,
-  exitCostRateAtom,
-  i0Atom,
-  inflationAtom,
-  loanAmountAtom,
-  loanRateAtom,
-  loanTermAtom,
-  monthlyOpex0Atom,
-  p0Atom,
-  prepayPenaltyRateAtom,
-  priceDecayAtom,
-  rentDecayAtom,
-  rentMonthly0Atom,
-  taxAnnualFixedAtom,
-  vacancyAtom,
-  yearsAtom,
-} from '@/atoms/dcf-input-atoms'
+  dcfInputAtom,
+  updateDCFInputAtom
+} from '@/atoms/calculation/dcf-input'
 import {
   deleteDataset,
+  deleteAllDatasets,
+  exportAllDatasetsAsJson,
+  exportDatasetAsJson,
   getDatasets,
   hasDatasetWithName,
   saveDataset,
+  importDatasetsFromJson,
+  previewImportData,
+  type ImportResult,
+  type ImportOptions,
+  type ImportPreview,
 } from '@/lib/dcf/dataset-storage'
 import type { DCFDataset, Input } from '@/types/dcf'
 
 export function useDCFDatasets() {
   const [datasets, setDatasets] = useState<DCFDataset[]>([])
 
-  // Get all atom setters for loading data
-  const [, setP0] = useAtom(p0Atom)
-  const [, setI0] = useAtom(i0Atom)
-  const [, setRentMonthly0] = useAtom(rentMonthly0Atom)
-  const [, setMonthlyOpex0] = useAtom(monthlyOpex0Atom)
-  const [, setVacancy] = useAtom(vacancyAtom)
-  const [, setInflation] = useAtom(inflationAtom)
-  const [, setRentDecay] = useAtom(rentDecayAtom)
-  const [, setPriceDecay] = useAtom(priceDecayAtom)
-  const [, setTaxAnnualFixed] = useAtom(taxAnnualFixedAtom)
-  const [, setExitCostRate] = useAtom(exitCostRateAtom)
-  const [, setYears] = useAtom(yearsAtom)
-  const [, setDiscountAsset] = useAtom(discountAssetAtom)
-  const [, setDiscountEquity] = useAtom(discountEquityAtom)
-  const [, setLoanAmount] = useAtom(loanAmountAtom)
-  const [, setLoanRate] = useAtom(loanRateAtom)
-  const [, setLoanTerm] = useAtom(loanTermAtom)
-  const [, setPrepayPenaltyRate] = useAtom(prepayPenaltyRateAtom)
-
-  // Get current input values from atoms
-  const [p0] = useAtom(p0Atom)
-  const [i0] = useAtom(i0Atom)
-  const [rentMonthly0] = useAtom(rentMonthly0Atom)
-  const [monthlyOpex0] = useAtom(monthlyOpex0Atom)
-  const [vacancy] = useAtom(vacancyAtom)
-  const [inflation] = useAtom(inflationAtom)
-  const [rentDecay] = useAtom(rentDecayAtom)
-  const [priceDecay] = useAtom(priceDecayAtom)
-  const [taxAnnualFixed] = useAtom(taxAnnualFixedAtom)
-  const [exitCostRate] = useAtom(exitCostRateAtom)
-  const [years] = useAtom(yearsAtom)
-  const [discountAsset] = useAtom(discountAssetAtom)
-  const [discountEquity] = useAtom(discountEquityAtom)
-  const [loanAmount] = useAtom(loanAmountAtom)
-  const [loanRate] = useAtom(loanRateAtom)
-  const [loanTerm] = useAtom(loanTermAtom)
-  const [prepayPenaltyRate] = useAtom(prepayPenaltyRateAtom)
+  // Use unified input atom
+  const currentInput = useAtomValue(dcfInputAtom)
+  const updateInput = useSetAtom(updateDCFInputAtom)
 
   const refreshDatasets = useCallback(() => {
     setDatasets(getDatasets())
@@ -76,25 +35,7 @@ export function useDCFDatasets() {
     refreshDatasets()
   }, [refreshDatasets])
 
-  const getCurrentInput = (): Input => ({
-    p0,
-    i0,
-    rentMonthly0,
-    monthlyOpex0,
-    vacancy,
-    inflation,
-    rentDecay,
-    priceDecay,
-    taxAnnualFixed,
-    exitCostRate,
-    years,
-    discountAsset,
-    discountEquity,
-    loanAmount,
-    loanRate,
-    loanTerm,
-    prepayPenaltyRate,
-  })
+  const getCurrentInput = (): Input => currentInput
 
   const saveCurrentDataset = (name: string): DCFDataset => {
     const input = getCurrentInput()
@@ -104,25 +45,7 @@ export function useDCFDatasets() {
   }
 
   const loadDataset = (dataset: DCFDataset) => {
-    const { input } = dataset
-
-    setP0(input.p0)
-    setI0(input.i0)
-    setRentMonthly0(input.rentMonthly0)
-    setMonthlyOpex0(input.monthlyOpex0)
-    setVacancy(input.vacancy)
-    setInflation(input.inflation)
-    setRentDecay(input.rentDecay)
-    setPriceDecay(input.priceDecay)
-    setTaxAnnualFixed(input.taxAnnualFixed)
-    setExitCostRate(input.exitCostRate)
-    setYears(input.years)
-    setDiscountAsset(input.discountAsset)
-    setDiscountEquity(input.discountEquity)
-    setLoanAmount(input.loanAmount)
-    setLoanRate(input.loanRate)
-    setLoanTerm(input.loanTerm)
-    setPrepayPenaltyRate(input.prepayPenaltyRate || 0)
+    updateInput(dataset.input)
   }
 
   const removeDataset = (id: string): boolean => {
@@ -133,8 +56,86 @@ export function useDCFDatasets() {
     return success
   }
 
+  const removeAllDatasets = (): boolean => {
+    const success = deleteAllDatasets()
+    if (success) {
+      refreshDatasets()
+    }
+    return success
+  }
+
   const checkNameExists = (name: string, excludeId?: string): boolean => {
     return hasDatasetWithName(name, excludeId)
+  }
+
+  const exportDatasetAsJsonString = (id: string): string => {
+    return exportDatasetAsJson(id)
+  }
+
+  const exportAllDatasetsAsJsonString = (): string => {
+    return exportAllDatasetsAsJson()
+  }
+
+  const copyDatasetToClipboard = async (id: string): Promise<boolean> => {
+    try {
+      const jsonString = exportDatasetAsJson(id)
+      await navigator.clipboard.writeText(jsonString)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const copyAllDatasetsToClipboard = async (): Promise<boolean> => {
+    try {
+      const jsonString = exportAllDatasetsAsJson()
+      await navigator.clipboard.writeText(jsonString)
+      return true
+    } catch {
+      return false
+    }
+  }
+
+  const importDatasetsFromJsonString = (jsonString: string, options?: ImportOptions): ImportResult => {
+    const result = importDatasetsFromJson(jsonString, options)
+    if (result.imported > 0) {
+      refreshDatasets()
+    }
+    return result
+  }
+
+  const importDatasetsFromFile = async (file: File): Promise<ImportResult> => {
+    try {
+      const text = await file.text()
+      return importDatasetsFromJsonString(text)
+    } catch (error) {
+      return {
+        success: false,
+        imported: 0,
+        skipped: 0,
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+        duplicates: []
+      }
+    }
+  }
+
+  const previewImportDataFromString = (jsonString: string): ImportPreview => {
+    return previewImportData(jsonString)
+  }
+
+  const previewImportDataFromFile = async (file: File): Promise<ImportPreview> => {
+    try {
+      const text = await file.text()
+      return previewImportData(text)
+    } catch (error) {
+      return {
+        isValid: false,
+        count: 0,
+        structure: 'invalid',
+        errors: [error instanceof Error ? error.message : 'Unknown error'],
+        duplicateNames: []
+      }
+    }
   }
 
   return {
@@ -142,7 +143,16 @@ export function useDCFDatasets() {
     saveCurrentDataset,
     loadDataset,
     removeDataset,
+    removeAllDatasets,
     checkNameExists,
     refreshDatasets,
+    exportDatasetAsJson: exportDatasetAsJsonString,
+    exportAllDatasetsAsJson: exportAllDatasetsAsJsonString,
+    copyDatasetToClipboard,
+    copyAllDatasetsToClipboard,
+    importDatasetsFromJson: importDatasetsFromJsonString,
+    importDatasetsFromFile,
+    previewImportData: previewImportDataFromString,
+    previewImportDataFromFile,
   }
 }

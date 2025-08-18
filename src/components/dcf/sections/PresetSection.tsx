@@ -1,20 +1,24 @@
-import { useAtom, useAtomValue } from 'jotai'
+import React from 'react'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { 
   currentPresetAtom, 
-  applyPresetAtom, 
+  applyLegacyPresetAtom as applyPresetAtom, 
   PRESET_CONFIGS,
   type PresetType,
   isCurrentPresetValidAtom 
 } from '@/atoms'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { ChevronDown } from 'lucide-react'
 
 export function PresetSection() {
   const [currentPreset, setCurrentPreset] = useAtom(currentPresetAtom)
-  const [, applyPreset] = useAtom(applyPresetAtom)
+  const applyPreset = useSetAtom(applyPresetAtom)
   const isPresetValid = useAtomValue(isCurrentPresetValidAtom)
+  const [isExpanded, setIsExpanded] = React.useState(false)
 
   const handlePresetApply = (presetType: PresetType) => {
     applyPreset(presetType)
@@ -25,22 +29,29 @@ export function PresetSection() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-lg">プリセット設定</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          不動産種別に応じた標準的な投資条件を一括設定できます
-        </p>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
+      <Card>
+        <CollapsibleTrigger asChild>
+          <CardHeader className="cursor-pointer hover:bg-muted/50">
+            <CardTitle className="flex items-center justify-between">
+              プリセット設定
+              <ChevronDown className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`} />
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              不動産種別に応じた標準的な投資条件を一括設定できます
+            </p>
+          </CardHeader>
+        </CollapsibleTrigger>
+        <CollapsibleContent>
+          <CardContent className="space-y-4">
         {currentPreset && !isPresetValid && (
           <Alert>
             <AlertDescription>
-              プリセット「{PRESET_CONFIGS[currentPreset].name}」から設定が変更されています。
+              プリセット「{PRESET_CONFIGS[currentPreset as PresetType].name}」から設定が変更されています。
               <Button 
                 variant="link" 
                 className="p-0 h-auto"
-                onClick={() => handlePresetApply(currentPreset)}
+                onClick={() => handlePresetApply(currentPreset as PresetType)}
               >
                 プリセットに戻す
               </Button>
@@ -86,7 +97,7 @@ export function PresetSection() {
         {currentPreset && (
           <div className="flex justify-between items-center pt-4 border-t">
             <div className="text-sm text-muted-foreground">
-              現在のプリセット: <span className="font-medium">{PRESET_CONFIGS[currentPreset].name}</span>
+              現在のプリセット: <span className="font-medium">{PRESET_CONFIGS[currentPreset as PresetType].name}</span>
             </div>
             <Button 
               variant="outline" 
@@ -97,7 +108,9 @@ export function PresetSection() {
             </Button>
           </div>
         )}
-      </CardContent>
-    </Card>
+          </CardContent>
+        </CollapsibleContent>
+      </Card>
+    </Collapsible>
   )
 }

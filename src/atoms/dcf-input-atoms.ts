@@ -1,3 +1,8 @@
+/**
+ * @deprecated This file is being migrated to the new atom structure.
+ * Please use atoms from '@/atoms/calculation' instead.
+ * This file will be removed in a future version.
+ */
 import { atom } from 'jotai'
 
 // Import atoms from organized files

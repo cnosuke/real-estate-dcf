@@ -141,3 +141,21 @@ export function calculatePaybackPeriod(cfEquity: number[]): number {
   // If never recovered during operating period, return total investment period
   return cfEquity.length - 1
 }
+
+/**
+ * Calculates the annual payment for an annuity (level payment loan)
+ * 
+ * @param principal - Loan amount
+ * @param rate - Annual interest rate as decimal (e.g., 0.05 for 5%)
+ * @param years - Loan term in years
+ * @returns Annual payment amount
+ * 
+ * @example
+ * const payment = annuityPayment(35000000, 0.025, 25)
+ * // Returns annual payment amount for 35M yen loan at 2.5% for 25 years
+ */
+export function annuityPayment(principal: number, rate: number, years: number): number {
+  if (principal <= 0 || years <= 0) return 0
+  if (Math.abs(rate) < 1e-10) return principal / years // Handle zero rate case
+  return (principal * rate) / (1 - (1 + rate) ** -years)
+}

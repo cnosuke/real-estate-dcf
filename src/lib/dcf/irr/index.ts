@@ -1,0 +1,5 @@
+export { IRRCalculator } from './irr-calculator'
+export type { IRRResult, IRRCalculationStrategy } from './irr-calculator'
+export { NewtonRaphsonIRRStrategy } from './newton-raphson-strategy'
+export { BisectionIRRStrategy } from './bisection-strategy'
+export { GridSearchIRRStrategy } from './grid-search-strategy'

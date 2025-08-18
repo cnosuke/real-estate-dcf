@@ -1,14 +1,17 @@
 import type { Input, Percentage, PositiveNumber, NonNegativeNumber, Rate, Year } from '@/types/dcf'
+import { DCF_CONFIG } from '@/lib/dcf/config'
 
 /**
  * Type guard for Percentage (0 <= value <= 1)
+ * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
 export function isPercentage(value: number): value is Percentage {
-  return Number.isFinite(value) && value >= 0 && value <= 1
+  return Number.isFinite(value) && value >= DCF_CONFIG.VALIDATION.MIN_PERCENTAGE && value <= DCF_CONFIG.VALIDATION.MAX_PERCENTAGE
 }
 
 /**
  * Type guard for PositiveNumber (value > 0)
+ * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
 export function isPositiveNumber(value: number): value is PositiveNumber {
   return Number.isFinite(value) && value > 0
@@ -16,6 +19,7 @@ export function isPositiveNumber(value: number): value is PositiveNumber {
 
 /**
  * Type guard for NonNegativeNumber (value >= 0)
+ * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
 export function isNonNegativeNumber(value: number): value is NonNegativeNumber {
   return Number.isFinite(value) && value >= 0
@@ -23,16 +27,18 @@ export function isNonNegativeNumber(value: number): value is NonNegativeNumber {
 
 /**
  * Type guard for Year (value >= 1)
+ * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
 export function isYear(value: number): value is Year {
-  return Number.isInteger(value) && value >= 1
+  return Number.isInteger(value) && value >= DCF_CONFIG.VALIDATION.MIN_YEARS && value <= DCF_CONFIG.VALIDATION.MAX_YEARS
 }
 
 /**
  * Type guard for Rate (value >= 0)
+ * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
 export function isRate(value: number): value is Rate {
-  return Number.isFinite(value) && value >= 0
+  return Number.isFinite(value) && value >= DCF_CONFIG.VALIDATION.MIN_RATE
 }
 
 /**
@@ -65,6 +71,7 @@ export class TypeValidationResult<T> {
 
 /**
  * Validates input object with detailed error reporting
+ * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
 export function validateInput(input: unknown): TypeValidationResult<Input> {
   if (typeof input !== 'object' || input === null) {
@@ -164,6 +171,7 @@ export function validateInput(input: unknown): TypeValidationResult<Input> {
 
 /**
  * Simple type guard for backward compatibility
+ * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
 export function isValidInput(input: unknown): input is Input {
   return validateInput(input).isValid

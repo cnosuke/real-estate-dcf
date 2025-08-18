@@ -1,3 +1,8 @@
+/**
+ * @deprecated This file is being migrated to the new atom structure.
+ * Please use atoms from '@/atoms/presets' instead.
+ * This file will be removed in a future version.
+ */
 import { atom } from 'jotai'
 import { 
   p0Atom, i0Atom, rentMonthly0Atom, monthlyOpex0Atom, taxAnnualFixedAtom 

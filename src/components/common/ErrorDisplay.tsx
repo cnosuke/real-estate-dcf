@@ -20,7 +20,7 @@ export function ErrorDisplay({
   showDetails = false 
 }: ErrorDisplayProps) {
   const errorConfig = getErrorConfig(error.type)
-  const message = generateErrorMessage(error)
+  const message = error.getUserMessage()
 
   if (compact) {
     return (
@@ -87,13 +87,13 @@ export function ErrorDisplay({
           </div>
         )}
 
-        {showDetails && error.debugInfo && (
+        {showDetails && (
           <details className="text-sm">
             <summary className="cursor-pointer font-medium mb-2">
               詳細情報
             </summary>
             <div className="bg-muted p-3 rounded text-xs">
-              <pre>{JSON.stringify(error.debugInfo, null, 2)}</pre>
+              <pre>{JSON.stringify(error.getDebugInfo(), null, 2)}</pre>
             </div>
           </details>
         )}
