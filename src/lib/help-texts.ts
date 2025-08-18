@@ -569,7 +569,7 @@ const SECTION_HELP_TEXTS = {
 
 // ヘルプテキストのキー一覧を型として定義
 export type InputHelpTextKey = keyof typeof INPUT_HELP_TEXTS
-export type SectionHelpTextKey = keyof typeof SECTION_HELP_TEXTS
+type SectionHelpTextKey = keyof typeof SECTION_HELP_TEXTS
 
 // ヘルプテキストの取得ヘルパー関数
 export function getInputHelpText(key: InputHelpTextKey) {

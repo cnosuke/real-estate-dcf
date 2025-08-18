@@ -1,18 +1,18 @@
 import type React from 'react'
+import { WithFieldError } from '@/components/ui/errors'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { getInputHelpText, type InputHelpTextKey } from '@/lib/help-texts'
 import type { Input as DCFInput } from '@/types/dcf'
 import { useDCFForm } from '../providers/DCFFormProvider'
-import { WithFieldError } from '@/components/ui/errors'
 
 // 数値フォーマット用ヘルパー
 export const formatNumber = (value: number) => {
   return new Intl.NumberFormat('ja-JP').format(value)
 }
 
-export const formatPercent = (value: number) => {
+const _formatPercent = (value: number) => {
   return `${(value * 100).toFixed(2)}%`
 }
 

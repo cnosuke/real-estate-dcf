@@ -1,7 +1,7 @@
 /**
- * フィールド名の日本語マッピング
+ * フィールド名の日本語マッピング（内部使用のみ）
  */
-export const FIELD_DISPLAY_NAMES: Record<string, string> = {
+const FIELD_DISPLAY_NAMES: Record<string, string> = {
   p0: '物件価格',
   i0: '初期費用',
   rentMonthly0: '月額家賃',
@@ -26,7 +26,7 @@ export const FIELD_DISPLAY_NAMES: Record<string, string> = {
   implicitCap: '暗黙Cap率',
   cashFlows: 'キャッシュフロー',
   noi: 'NOI',
-  salePrice: '売却価格'
+  salePrice: '売却価格',
 }
 
 /**
@@ -46,10 +46,10 @@ export function formatValue(value: unknown): string {
     }
     return value.toFixed(4)
   }
-  
+
   if (Array.isArray(value)) {
     return `配列 (${value.length}要素)`
   }
-  
+
   return String(value)
 }

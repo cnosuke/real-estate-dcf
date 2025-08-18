@@ -3,12 +3,7 @@ import React, { Component, type ReactNode } from 'react'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  DCFError,
-  DCFErrorType,
-  getErrorMessage,
-  logError,
-} from '@/lib/errors'
+import { DCFError, DCFErrorType, getErrorMessage, logError } from '@/lib/errors'
 
 interface Props {
   children: ReactNode
@@ -60,7 +55,8 @@ export class ErrorBoundary extends Component<Props, State> {
       const { error } = this.state
       const isDCFError = error instanceof DCFError
       const errorMessage = isDCFError
-        ? (error as DCFError).message || getErrorMessage((error as DCFError).type)
+        ? (error as DCFError).message ||
+          getErrorMessage((error as DCFError).type)
         : 'アプリケーションでエラーが発生しました'
 
       const isUserError =
@@ -134,9 +130,9 @@ export class ErrorBoundary extends Component<Props, State> {
 }
 
 /**
- * Higher-order component for wrapping components with error boundary
+ * Higher-order component for wrapping components with error boundary (internal use only)
  */
-export function withErrorBoundary<P extends object>(
+function _withErrorBoundary<P extends object>(
   Component: React.ComponentType<P>,
   fallback?: ReactNode,
   onError?: (error: Error, errorInfo: React.ErrorInfo) => void,
@@ -151,9 +147,9 @@ export function withErrorBoundary<P extends object>(
 }
 
 /**
- * Hook for handling errors in functional components
+ * Hook for handling errors in functional components (internal use only)
  */
-export function useErrorHandler() {
+function _useErrorHandler() {
   const [error, setError] = React.useState<Error | null>(null)
 
   const handleError = React.useCallback((error: Error) => {

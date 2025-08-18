@@ -1,9 +1,9 @@
 import { DCFErrorType } from './types'
 
 /**
- * DCFエラータイプごとのデフォルトメッセージ
+ * DCFエラータイプごとのデフォルトメッセージ（内部使用のみ）
  */
-export const DEFAULT_ERROR_MESSAGES: Record<DCFErrorType, string> = {
+const DEFAULT_ERROR_MESSAGES: Record<DCFErrorType, string> = {
   [DCFErrorType.INVALID_INPUT]: '入力値が無効です',
   [DCFErrorType.BUSINESS_RULE_VIOLATION]: 'ビジネスルールに違反しています',
   [DCFErrorType.IRR_CALCULATION_FAILED]: 'IRR計算に失敗しました',

@@ -2,7 +2,6 @@ import { useAtomValue, useSetAtom } from 'jotai'
 import React, { createContext, type ReactNode, useContext } from 'react'
 import { dcfInputAtom, updateDCFInputAtom } from '@/atoms/calculation/dcf-input'
 import {
-  autoCalculateDCFAtom,
   executeDCFCalculationAtom,
   isCalculatingAtom,
 } from '@/atoms/calculation/dcf-output'
@@ -59,12 +58,12 @@ export function DCFFormProvider({
     if (autoCalculate && !hasErrors) {
       executeCalculation()
     }
-  }, [input, hasErrors, autoCalculate, executeCalculation])
+  }, [hasErrors, autoCalculate, executeCalculation])
 
   const getFieldError = React.useCallback(
     (fieldName: string): DCFError | undefined => {
       const fieldError = errors.find(
-        (error) => error.context?.field === fieldName,
+        (error: DCFError) => error.context?.field === fieldName,
       )
       return fieldError
     },

@@ -1,6 +1,5 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { ChevronDown } from 'lucide-react'
-import React from 'react'
 import { propertyBasicSectionExpandedAtom, toggleSectionAtom } from '@/atoms/ui'
 import {
   Card,
@@ -56,7 +55,7 @@ export function PropertyBasicSection() {
                 fieldName="p0"
                 label="物件価格"
                 value={input.p0}
-                onChange={(value) => {}} // 内部でupdateInputが呼ばれる
+                onChange={(_value) => {}} // 内部でupdateInputが呼ばれる
                 step={1000000}
                 unit="円"
               />
@@ -64,7 +63,7 @@ export function PropertyBasicSection() {
                 fieldName="i0"
                 label="初期諸費用"
                 value={input.i0}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 step={100000}
                 unit="円"
               />
@@ -72,7 +71,7 @@ export function PropertyBasicSection() {
                 fieldName="rentMonthly0"
                 label="月額家賃"
                 value={input.rentMonthly0}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 step={10000}
                 unit="円"
               />
@@ -80,7 +79,7 @@ export function PropertyBasicSection() {
                 fieldName="monthlyOpex0"
                 label="月額運営費"
                 value={input.monthlyOpex0}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 step={5000}
                 unit="円"
               />
@@ -88,7 +87,7 @@ export function PropertyBasicSection() {
                 fieldName="taxAnnualFixed"
                 label="年間固定資産税"
                 value={input.taxAnnualFixed}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 step={10000}
                 unit="円"
               />

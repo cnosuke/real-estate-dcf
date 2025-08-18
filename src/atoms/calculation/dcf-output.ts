@@ -1,12 +1,12 @@
 import { atom } from 'jotai'
 import { runDCF } from '@/lib/dcf/dcf-calculator'
-import { DCFValidator } from '@/lib/validation'
 import { DCFError, DCFErrorFactory } from '@/lib/errors'
+import { DCFValidator } from '@/lib/validation'
 import type { Result } from '@/types/dcf'
 import { dcfInputAtom } from './dcf-input'
 
-// DCF計算状態管理
-export enum DCFCalculationState {
+// DCF計算状態管理（内部使用のみ）
+enum DCFCalculationState {
   IDLE = 'idle',
   CALCULATING = 'calculating',
   SUCCESS = 'success',
@@ -103,7 +103,7 @@ export const hasCalculationErrorAtom = atom(
   (get) => get(dcfCalculationStateAtom) === DCFCalculationState.ERROR,
 )
 
-const calculationSuccessAtom = atom(
+const _calculationSuccessAtom = atom(
   (get) => get(dcfCalculationStateAtom) === DCFCalculationState.SUCCESS,
 )
 
@@ -113,7 +113,7 @@ export const currentDCFErrorAtom = atom<DCFError | null>((get) => {
 })
 
 // 既存の結果状態atom（後方互換性のため）
-const dcfResultStateAtom = atom((get) => {
+const _dcfResultStateAtom = atom((get) => {
   const result = get(dcfResultAtom)
   const error = get(dcfCalculationErrorAtom)
   const isCalculating = get(isCalculatingAtom)

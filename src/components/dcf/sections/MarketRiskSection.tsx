@@ -1,6 +1,5 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { ChevronDown } from 'lucide-react'
-import React from 'react'
 import { marketRiskSectionExpandedAtom, toggleSectionAtom } from '@/atoms/ui'
 import {
   Card,
@@ -56,7 +55,7 @@ export function MarketRiskSection() {
                 fieldName="vacancy"
                 label="空室率"
                 value={input.vacancy}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 type="percentage"
                 step={0.01}
               />
@@ -64,7 +63,7 @@ export function MarketRiskSection() {
                 fieldName="inflation"
                 label="インフレ率"
                 value={input.inflation}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 type="percentage"
                 step={0.001}
               />
@@ -72,7 +71,7 @@ export function MarketRiskSection() {
                 fieldName="rentDecay"
                 label="家賃逓減率"
                 value={input.rentDecay}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 type="percentage"
                 step={0.001}
               />
@@ -80,7 +79,7 @@ export function MarketRiskSection() {
                 fieldName="priceDecay"
                 label="価格逓減率"
                 value={input.priceDecay}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 type="percentage"
                 step={0.001}
               />

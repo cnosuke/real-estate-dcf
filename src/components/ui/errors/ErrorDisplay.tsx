@@ -1,10 +1,9 @@
-import React from 'react'
 import { CheckCircle } from 'lucide-react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { DCFError } from '@/lib/errors/types'
+import type { DCFError } from '@/lib/errors/types'
 import { ErrorList } from './ErrorList'
 
-export interface ErrorDisplayProps {
+interface ErrorDisplayProps {
   errors?: DCFError[]
   warnings?: DCFError[]
   onDismissError?: (index: number) => void
@@ -15,7 +14,7 @@ export interface ErrorDisplayProps {
   emptyMessage?: string
 }
 
-export function ErrorDisplay({ 
+function _ErrorDisplay({
   errors = [],
   warnings = [],
   onDismissError,
@@ -23,9 +22,8 @@ export function ErrorDisplay({
   compact = false,
   showDetails = true,
   title,
-  emptyMessage = '入力値と計算結果に特に問題は検出されませんでした。ただし、投資判断は複数の観点から慎重に行ってください。'
+  emptyMessage = '入力値と計算結果に特に問題は検出されませんでした。ただし、投資判断は複数の観点から慎重に行ってください。',
 }: ErrorDisplayProps) {
-  
   // エラーも警告もない場合
   if (errors.length === 0 && warnings.length === 0) {
     return (
@@ -37,9 +35,7 @@ export function ErrorDisplay({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-sm text-muted-foreground">
-            {emptyMessage}
-          </div>
+          <div className="text-sm text-muted-foreground">{emptyMessage}</div>
         </CardContent>
       </Card>
     )

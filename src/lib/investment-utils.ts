@@ -160,7 +160,7 @@ export function calculatePaybackPeriod(cfEquity: number[]): number {
  * const payment = annuityPayment(35000000, 0.025, 25)
  * // Returns annual payment amount for 35M yen loan at 2.5% for 25 years
  */
-function annuityPayment(
+function _annuityPayment(
   principal: number,
   rate: number,
   years: number,

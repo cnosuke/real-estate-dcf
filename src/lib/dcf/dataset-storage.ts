@@ -133,7 +133,7 @@ export function saveDataset(name: string, input: Input): DCFDataset {
     id: existingDataset?.id || generateId(),
     name,
     createdAt: new Date().toISOString(),
-    input: validation.value!,
+    input: validation.value as Input, // バリデーション通過済み
     version: CURRENT_STORAGE_VERSION,
   }
 
@@ -190,7 +190,7 @@ export function getDatasets(): DCFDataset[] {
             id: dataset.id,
             name: dataset.name,
             createdAt: dataset.createdAt,
-            input: validation.value!,
+            input: validation.value as Input, // バリデーション通過済み
           })
         } else {
           invalidDatasetIds.push(datasetId)
@@ -225,7 +225,7 @@ export function getDatasets(): DCFDataset[] {
   )
 }
 
-export function getDataset(id: string): DCFDataset | null {
+function getDataset(id: string): DCFDataset | null {
   initializeStorage()
 
   try {
@@ -247,7 +247,7 @@ export function getDataset(id: string): DCFDataset | null {
           id: dataset.id,
           name: dataset.name,
           createdAt: dataset.createdAt,
-          input: validation.value!,
+          input: validation.value as Input, // バリデーション通過済み
         }
       }
     }
@@ -328,7 +328,7 @@ export function exportAllDatasetsAsJson(): string {
   return JSON.stringify(exportData, null, 2)
 }
 
-export function migrateFromLegacy(): boolean {
+function migrateFromLegacy(): boolean {
   try {
     const legacyData = localStorage.getItem(STORAGE_KEYS.datasets)
     if (!legacyData) {
@@ -357,7 +357,7 @@ export function migrateFromLegacy(): boolean {
             id: legacyDataset.id,
             name: legacyDataset.name,
             createdAt: legacyDataset.createdAt,
-            input: validation.value!,
+            input: validation.value as Input, // バリデーション通過済み
             version: CURRENT_STORAGE_VERSION,
             metadata: {
               migratedFrom: 'legacy',
@@ -390,7 +390,7 @@ export function migrateFromLegacy(): boolean {
   }
 }
 
-export function getStorageInfo(): StorageInfo {
+function _getStorageInfo(): StorageInfo {
   initializeStorage()
 
   const metadata = getMetadata()
@@ -445,7 +445,7 @@ export interface ImportOptions {
 type JsonStructure = 'single' | 'multiple' | 'array' | 'invalid'
 
 // Detect JSON structure automatically
-export function detectJsonStructure(jsonData: unknown): JsonStructure {
+function detectJsonStructure(jsonData: unknown): JsonStructure {
   if (!jsonData || typeof jsonData !== 'object') {
     return 'invalid'
   }
@@ -498,7 +498,7 @@ function isDatasetLike(obj: unknown): boolean {
 }
 
 // Validate dataset structure
-export function validateDatasetStructure(data: unknown): {
+function validateDatasetStructure(data: unknown): {
   isValid: boolean
   errors: string[]
 } {
@@ -550,7 +550,7 @@ function generateUniqueName(baseName: string, existingNames: string[]): string {
 }
 
 // Import single dataset
-export function importSingleDataset(
+function importSingleDataset(
   data: unknown,
   options: ImportOptions = {},
 ): ImportResult {
@@ -581,13 +581,13 @@ export function importSingleDataset(
 
       if (options.overwriteExisting) {
         // Overwrite existing dataset
-        const savedDataset = saveDataset(dataset.name, dataset.input)
+        const _savedDataset = saveDataset(dataset.name, dataset.input)
         result.imported = 1
         result.success = true
       } else if (options.autoRename) {
         // Auto-rename to avoid conflict
         const uniqueName = generateUniqueName(dataset.name, existingNames)
-        const savedDataset = saveDataset(uniqueName, dataset.input)
+        const _savedDataset = saveDataset(uniqueName, dataset.input)
         result.imported = 1
         result.success = true
       } else {
@@ -597,7 +597,7 @@ export function importSingleDataset(
       }
     } else {
       // No conflict, save directly
-      const savedDataset = saveDataset(dataset.name, dataset.input)
+      const _savedDataset = saveDataset(dataset.name, dataset.input)
       result.imported = 1
       result.success = true
     }
@@ -609,7 +609,7 @@ export function importSingleDataset(
 }
 
 // Import multiple datasets
-export function importMultipleDatasets(
+function importMultipleDatasets(
   data: unknown,
   options: ImportOptions = {},
 ): ImportResult {

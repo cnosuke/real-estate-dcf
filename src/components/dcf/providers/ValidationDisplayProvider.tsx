@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  type ReactNode,
-  useContext,
-  useState,
-} from 'react'
-import type { DCFError } from '@/lib/errors'
+import { createContext, type ReactNode, useContext, useState } from 'react'
 
 interface ValidationDisplayContextValue {
   // 表示状態
@@ -75,7 +69,7 @@ export function ValidationDisplayProvider({
   )
 }
 
-export function useValidationDisplay(): ValidationDisplayContextValue {
+function _useValidationDisplay(): ValidationDisplayContextValue {
   const context = useContext(ValidationDisplayContext)
   if (!context) {
     throw new Error(

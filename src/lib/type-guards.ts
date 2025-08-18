@@ -247,22 +247,22 @@ export function validateInput(input: unknown): TypeValidationResult<Input> {
 
   // All validations passed, construct the validated input
   const validatedInput: Input = {
-    p0: p0!,
-    i0: i0!,
-    rentMonthly0: rentMonthly0!,
-    monthlyOpex0: monthlyOpex0!,
-    vacancy: vacancy!,
-    inflation: inflation!,
-    rentDecay: rentDecay!,
-    priceDecay: priceDecay!,
-    taxAnnualFixed: taxAnnualFixed!,
-    exitCostRate: exitCostRate!,
-    years: years!,
-    discountAsset: discountAsset!,
-    discountEquity: discountEquity!,
-    loanAmount: loanAmount!,
-    loanRate: loanRate!,
-    loanTerm: loanTerm!,
+    p0: p0 as number,
+    i0: i0 as number,
+    rentMonthly0: rentMonthly0 as number,
+    monthlyOpex0: monthlyOpex0 as number,
+    vacancy: vacancy as number,
+    inflation: inflation as number,
+    rentDecay: rentDecay as number,
+    priceDecay: priceDecay as number,
+    taxAnnualFixed: taxAnnualFixed as number,
+    exitCostRate: exitCostRate as number,
+    years: years as number,
+    discountAsset: discountAsset as number,
+    discountEquity: discountEquity as number,
+    loanAmount: loanAmount as number,
+    loanRate: loanRate as number,
+    loanTerm: loanTerm as number,
     ...(prepayPenaltyRate !== undefined && { prepayPenaltyRate }),
   }
 
@@ -273,7 +273,7 @@ export function validateInput(input: unknown): TypeValidationResult<Input> {
  * Simple type guard for backward compatibility
  * @deprecated Use DCFValidator.validateInput() for unified validation instead
  */
-function isValidInput(input: unknown): input is Input {
+function _isValidInput(input: unknown): input is Input {
   return validateInput(input).isValid
 }
 
@@ -322,27 +322,27 @@ function assertRate(value: number, fieldName: string): asserts value is Rate {
 /**
  * Safe type casting functions for creating constrained types
  */
-function toPercentage(value: number): Percentage {
+function _toPercentage(value: number): Percentage {
   assertPercentage(value, 'value')
   return value as Percentage
 }
 
-function toPositiveNumber(value: number): PositiveNumber {
+function _toPositiveNumber(value: number): PositiveNumber {
   assertPositiveNumber(value, 'value')
   return value as PositiveNumber
 }
 
-function toNonNegativeNumber(value: number): NonNegativeNumber {
+function _toNonNegativeNumber(value: number): NonNegativeNumber {
   assertNonNegativeNumber(value, 'value')
   return value as NonNegativeNumber
 }
 
-function toYear(value: number): Year {
+function _toYear(value: number): Year {
   assertYear(value, 'value')
   return value as Year
 }
 
-function toRate(value: number): Rate {
+function _toRate(value: number): Rate {
   assertRate(value, 'value')
   return value as Rate
 }

@@ -1,6 +1,5 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { ChevronDown } from 'lucide-react'
-import React from 'react'
 import {
   advancedSettingsSectionExpandedAtom,
   toggleSectionAtom,
@@ -69,7 +68,7 @@ export function AdvancedSettingsSection() {
                   fieldName="discountAsset"
                   label="資産基準利回り"
                   value={input.discountAsset}
-                  onChange={(value) => {}}
+                  onChange={(_value) => {}}
                   type="percentage"
                   step={0.001}
                 />
@@ -77,7 +76,7 @@ export function AdvancedSettingsSection() {
                   fieldName="discountEquity"
                   label="自己資金基準利回り"
                   value={input.discountEquity}
-                  onChange={(value) => {}}
+                  onChange={(_value) => {}}
                   type="percentage"
                   step={0.001}
                 />

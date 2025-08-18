@@ -239,3 +239,6 @@ export class InputValidator {
     return errors
   }
 }
+
+// 個別の関数エクスポート（静的クラス回避のため）
+export const validateInputData = InputValidator.validate

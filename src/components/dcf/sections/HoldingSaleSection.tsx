@@ -1,6 +1,5 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { ChevronDown } from 'lucide-react'
-import React from 'react'
 import { holdingSaleSectionExpandedAtom, toggleSectionAtom } from '@/atoms/ui'
 import {
   Card,
@@ -56,7 +55,7 @@ export function HoldingSaleSection() {
                 fieldName="years"
                 label="保有年数"
                 value={input.years}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 step={1}
                 min={1}
                 unit="年"
@@ -65,7 +64,7 @@ export function HoldingSaleSection() {
                 fieldName="exitCostRate"
                 label="売却コスト率"
                 value={input.exitCostRate}
-                onChange={(value) => {}}
+                onChange={(_value) => {}}
                 type="percentage"
                 step={0.001}
               />

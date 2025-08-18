@@ -1,5 +1,4 @@
 import type { DCFError } from '@/lib/errors'
-import type { Input, Result } from '@/types/dcf'
 
 /**
  * バリデーション結果の統一インターフェース
@@ -12,35 +11,9 @@ export interface ValidationResult<T = unknown> {
 }
 
 /**
- * バリデーションコンテキスト
+ * 範囲設定（内部使用のみ）
  */
-export interface ValidationContext {
-  field: string
-  value: unknown
-  input?: Input
-  result?: Partial<Result>
-}
-
-/**
- * バリデーションルール
- */
-export interface ValidationRule<T = unknown> {
-  name: string
-  validator: (value: T, context?: ValidationContext) => ValidationResult<T>
-  required?: boolean
-}
-
-/**
- * バリデーションスキーマ
- */
-export interface ValidationSchema {
-  [fieldName: string]: ValidationRule[]
-}
-
-/**
- * 範囲設定
- */
-export interface RangeBounds {
+interface RangeBounds {
   MIN: number
   MAX: number
 }

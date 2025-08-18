@@ -1,4 +1,4 @@
-import { DETAILED_ERROR_MESSAGES, getErrorMessage } from './messages'
+import { getErrorMessage } from './messages'
 import {
   DCFError,
   DCFErrorType,
@@ -173,3 +173,19 @@ export class DCFErrorFactory {
     return new DCFError(type, ErrorSeverity.CRITICAL, message, context)
   }
 }
+
+// 個別の関数エクスポート（静的クラス回避のため）
+export const createValidationError = DCFErrorFactory.createValidationError
+export const createCalculationError = DCFErrorFactory.createCalculationError
+export const createIRRError = DCFErrorFactory.createIRRError
+export const createWarning = DCFErrorFactory.createWarning
+export const createBusinessRuleError = DCFErrorFactory.createBusinessRuleError
+export const createBusinessRuleWarning =
+  DCFErrorFactory.createBusinessRuleWarning
+export const createUnrealisticResultWarning =
+  DCFErrorFactory.createUnrealisticResultWarning
+export const createMarketInconsistencyWarning =
+  DCFErrorFactory.createMarketInconsistencyWarning
+export const createNumericalInstabilityError =
+  DCFErrorFactory.createNumericalInstabilityError
+export const createCriticalError = DCFErrorFactory.createCriticalError

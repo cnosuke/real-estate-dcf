@@ -207,3 +207,6 @@ export class BusinessRuleValidator {
     return warnings
   }
 }
+
+// 個別の関数エクスポート（静的クラス回避のため）
+export const validateBusinessRulesData = BusinessRuleValidator.validate

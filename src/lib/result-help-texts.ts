@@ -350,8 +350,8 @@ export const RESULT_FAQ = [
 ] as const
 
 // ヘルプテキストのキー一覧を型として定義
-export type ResultHelpTextKey = keyof typeof RESULT_HELP_TEXTS
-export type IndicatorGroupKey = keyof typeof INDICATOR_GROUPS
+type ResultHelpTextKey = keyof typeof RESULT_HELP_TEXTS
+type IndicatorGroupKey = keyof typeof INDICATOR_GROUPS
 
 // ヘルプテキストの取得ヘルパー関数
 export function getResultHelpText(key: ResultHelpTextKey) {
@@ -366,6 +366,6 @@ export function getResultHelpText(key: ResultHelpTextKey) {
   }
 }
 
-function getIndicatorGroup(key: IndicatorGroupKey) {
+function _getIndicatorGroup(key: IndicatorGroupKey) {
   return INDICATOR_GROUPS[key]
 }

@@ -185,7 +185,7 @@ export function DCFInputFormHeader() {
           if (preview.errors.length > 0) {
             setImportError(preview.errors[0])
           }
-        } catch (error) {
+        } catch (_error) {
           setImportError('ファイルの読み込みに失敗しました')
           setPreviewData(null)
         }
@@ -209,7 +209,7 @@ export function DCFInputFormHeader() {
         } else {
           setImportError('')
         }
-      } catch (error) {
+      } catch (_error) {
         setImportError('JSONデータの解析に失敗しました')
         setPreviewData(null)
       }
@@ -705,7 +705,10 @@ export function DCFInputFormHeader() {
                   <Label>エラー詳細:</Label>
                   <div className="text-sm bg-muted p-2 rounded max-h-32 overflow-auto">
                     {importResult.errors.map((error, index) => (
-                      <div key={index} className="text-red-600">
+                      <div
+                        key={`error-${error.slice(0, 20)}-${index}`}
+                        className="text-red-600"
+                      >
                         {error}
                       </div>
                     ))}
@@ -717,8 +720,8 @@ export function DCFInputFormHeader() {
                 <div>
                   <Label>重複した名前:</Label>
                   <div className="text-sm bg-muted p-2 rounded max-h-32 overflow-auto">
-                    {importResult.duplicates.map((name, index) => (
-                      <div key={index}>{name}</div>
+                    {importResult.duplicates.map((name) => (
+                      <div key={`duplicate-${name}`}>{name}</div>
                     ))}
                   </div>
                 </div>

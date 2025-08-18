@@ -11,7 +11,7 @@ export class GridSearchIRRStrategy implements IRRCalculationStrategy {
     return 'grid-search'
   }
 
-  isApplicable(cashFlows: number[]): boolean {
+  isApplicable(_cashFlows: number[]): boolean {
     // Grid search is always applicable as a last resort
     return true
   }

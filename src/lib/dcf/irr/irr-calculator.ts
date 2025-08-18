@@ -1,5 +1,4 @@
 import { type DCFError, DCFErrorFactory } from '@/lib/errors'
-import { CALCULATION_CONFIG } from '../calculation-config'
 import { BisectionIRRStrategy } from './bisection-strategy'
 import { GridSearchIRRStrategy } from './grid-search-strategy'
 import { NewtonRaphsonIRRStrategy } from './newton-raphson-strategy'
@@ -64,7 +63,7 @@ export class IRRCalculator {
         if (result.converged && this.isValidIRR(result.value)) {
           return result
         }
-      } catch (error) {}
+      } catch (_error) {}
     }
 
     // All strategies failed

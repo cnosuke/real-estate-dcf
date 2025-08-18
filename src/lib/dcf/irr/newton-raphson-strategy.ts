@@ -11,7 +11,7 @@ export class NewtonRaphsonIRRStrategy implements IRRCalculationStrategy {
     return 'newton-raphson'
   }
 
-  isApplicable(cashFlows: number[]): boolean {
+  isApplicable(_cashFlows: number[]): boolean {
     // Newton-Raphson method is generally applicable to all cases
     return true
   }

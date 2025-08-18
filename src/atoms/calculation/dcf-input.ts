@@ -44,7 +44,7 @@ export const dcfInputAtom = atom<Input>((get) => ({
 // 入力値更新用のアクション
 export const updateDCFInputAtom = atom(
   null,
-  (get, set, updates: Partial<Input>) => {
+  (_get, set, updates: Partial<Input>) => {
     // 型安全な更新
     if (updates.p0 !== undefined) set(p0Atom, updates.p0)
     if (updates.i0 !== undefined) set(i0Atom, updates.i0)

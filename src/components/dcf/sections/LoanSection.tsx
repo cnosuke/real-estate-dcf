@@ -1,6 +1,5 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { ChevronDown } from 'lucide-react'
-import React from 'react'
 import { loanSectionExpandedAtom, toggleSectionAtom } from '@/atoms/ui'
 import {
   Card,

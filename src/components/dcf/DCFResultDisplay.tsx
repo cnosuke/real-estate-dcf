@@ -2,16 +2,13 @@ import { useAtomValue } from 'jotai'
 import {
   AlertCircle,
   AlertTriangle,
-  Calculator,
   CheckCircle,
   ChevronDown,
   Info,
   MinusCircle,
-  TrendingDown,
-  TrendingUp,
   XCircle,
 } from 'lucide-react'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import {
   discountAssetAtom,
   discountEquityAtom,
@@ -21,7 +18,6 @@ import {
   dcfResultAtom,
   hasCalculationErrorAtom,
 } from '@/atoms/calculation/dcf-output'
-import { ErrorList } from '@/components/ui/errors'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -31,6 +27,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import { ErrorList } from '@/components/ui/errors'
 import { HelpTooltip } from '@/components/ui/help-tooltip'
 import {
   Table,
@@ -43,10 +40,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { DCFError } from '@/lib/errors'
 import { formatCurrency, formatPercent } from '@/lib/format-utils'
-import {
-  calculatePaybackPeriod,
-  getInvestmentGrade,
-} from '@/lib/investment-utils'
+import { calculatePaybackPeriod } from '@/lib/investment-utils'
 import {
   getResultHelpText,
   RESULT_FAQ,
@@ -163,8 +157,8 @@ export function DCFResultDisplay() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {RESULT_FAQ.map((faq, index) => (
-              <Collapsible key={index}>
+            {RESULT_FAQ.map((faq) => (
+              <Collapsible key={faq.question.slice(0, 20)}>
                 <CollapsibleTrigger asChild>
                   <Button
                     variant="ghost"
@@ -219,7 +213,7 @@ function InvestmentSummary({ result }: { result: Result }) {
                 title="NPV（資産）"
                 value={formatCurrency(result.npvAsset)}
                 status={result.npvAsset > 0 ? 'positive' : 'negative'}
-                helpText={RESULT_HELP_TEXTS.npvAsset}
+                helpText={getResultHelpText('npvAsset')}
               />
               <IndicatorCard
                 title="IRR（資産）"
@@ -227,13 +221,13 @@ function InvestmentSummary({ result }: { result: Result }) {
                 status={
                   result.irrAsset > discountAsset ? 'positive' : 'negative'
                 }
-                helpText={RESULT_HELP_TEXTS.irrAsset}
+                helpText={getResultHelpText('irrAsset')}
               />
               <IndicatorCard
                 title="NPV（エクイティ）"
                 value={formatCurrency(result.npvEquity)}
                 status={result.npvEquity > 0 ? 'positive' : 'negative'}
-                helpText={RESULT_HELP_TEXTS.npvEquity}
+                helpText={getResultHelpText('npvEquity')}
               />
               <IndicatorCard
                 title="IRR（エクイティ）"
@@ -241,7 +235,7 @@ function InvestmentSummary({ result }: { result: Result }) {
                 status={
                   result.irrEquity > discountEquity ? 'positive' : 'negative'
                 }
-                helpText={RESULT_HELP_TEXTS.irrEquity}
+                helpText={getResultHelpText('irrEquity')}
               />
             </div>
 
@@ -419,7 +413,7 @@ function CashFlowAnalysis({ result }: { result: Result }) {
                     .slice(0, index + 1)
                     .reduce((sum, cf) => sum + cf, 0)
                   return (
-                    <TableRow key={index}>
+                    <TableRow key={`cf-year-${index}-${assetCf}`}>
                       <TableCell className="font-medium">
                         {index === 0 ? '初期' : `${index}年目`}
                       </TableCell>
@@ -627,7 +621,7 @@ interface IndicatorCardProps {
   title: string
   value: string
   status: 'positive' | 'negative' | 'neutral'
-  helpText: any
+  helpText: { title: string; content: string } | null
 }
 
 function IndicatorCard({ title, value, status, helpText }: IndicatorCardProps) {
@@ -661,20 +655,9 @@ function IndicatorCard({ title, value, status, helpText }: IndicatorCardProps) {
         </span>
         <div className="flex items-center gap-1">
           {getStatusIcon()}
-          <HelpTooltip
-            title={helpText.title}
-            content={
-              getResultHelpText(
-                title.includes('資産')
-                  ? 'npvAsset'
-                  : title.includes('エクイティ')
-                    ? 'npvEquity'
-                    : title.includes('IRR') && title.includes('資産')
-                      ? 'irrAsset'
-                      : 'irrEquity',
-              )?.content || ''
-            }
-          />
+          {helpText && (
+            <HelpTooltip title={helpText.title} content={helpText.content} />
+          )}
         </div>
       </div>
       <div className="text-lg font-semibold">{value}</div>

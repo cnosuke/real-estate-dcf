@@ -72,3 +72,9 @@ export class DCFValidator {
     }
   }
 }
+
+// 個別の関数エクスポート（静的クラス回避のため）
+export const validateInput = DCFValidator.validateInput
+export const validateBusinessRules = DCFValidator.validateBusinessRules
+export const validateResults = DCFValidator.validateResults
+export const validateComplete = DCFValidator.validateComplete

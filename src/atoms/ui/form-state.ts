@@ -38,9 +38,9 @@ export const toggleSectionAtom = atom(null, (get, set, sectionName: string) => {
   }
 })
 
-const setFormEditingAtom = atom(
+const _setFormEditingAtom = atom(
   null,
-  (get, set, editing: boolean, fieldName?: string) => {
+  (_get, set, editing: boolean, fieldName?: string) => {
     set(isFormEditingAtom, editing)
     if (editing && fieldName) {
       set(lastModifiedFieldAtom, fieldName)
@@ -61,7 +61,7 @@ const allSectionsExpandedAtom = atom((get) => {
   )
 })
 
-const toggleAllSectionsAtom = atom(null, (get, set) => {
+const _toggleAllSectionsAtom = atom(null, (get, set) => {
   const allExpanded = get(allSectionsExpandedAtom)
   const newState = !allExpanded
 

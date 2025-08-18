@@ -4,11 +4,10 @@ import {
   DCFErrorLogger,
   DCFErrorType,
   ErrorSeverity,
-  logError,
 } from '@/lib/errors'
+import { DCFValidator } from '@/lib/validation'
 import type { DebtYear, Input, Result } from '@/types/dcf'
 import { CALCULATION_CONFIG } from './calculation-config'
-import { DCFValidator } from '@/lib/validation'
 import { IRRCalculator } from './irr'
 
 const pow1p = (x: number, n: number) => (1 + x) ** n
@@ -75,9 +74,9 @@ export function runDCF(input: Input): Result {
     }
 
     // Validate business rules using unified validator
-    const businessValidation = DCFValidator.validateBusinessRules(
-      inputValidation.value!,
-    )
+    const validatedInput = inputValidation.value as Input // 既にバリデーション済み
+    const businessValidation =
+      DCFValidator.validateBusinessRules(validatedInput)
     if (!businessValidation.isValid) {
       const error = businessValidation.errors[0] // Throw first critical error
       DCFErrorLogger.log(error, 'runDCF:businessRules')
@@ -90,7 +89,7 @@ export function runDCF(input: Input): Result {
       collectedWarnings.push(warning)
     })
 
-    const in_ = { prepayPenaltyRate: 0 as const, ...inputValidation.value! }
+    const in_ = { prepayPenaltyRate: 0 as const, ...validatedInput }
     const N = in_.years
 
     const cfAsset = new Array<number>(N + 1).fill(0)
@@ -171,8 +170,6 @@ export function runDCF(input: Input): Result {
     // 指標計算
     let npvAsset: number
     let npvEquity: number
-    let irrAsset: number
-    let irrEquity: number
 
     try {
       npvAsset = npv(in_.discountAsset, cfAsset)
@@ -197,7 +194,7 @@ export function runDCF(input: Input): Result {
         })
       )
     }
-    irrAsset = assetIRRResult.value
+    const irrAsset = assetIRRResult.value
 
     const equityIRRResult = irrCalculator.calculate(cfEquity, 0.08)
     if (!equityIRRResult.converged) {
@@ -208,7 +205,7 @@ export function runDCF(input: Input): Result {
         })
       )
     }
-    irrEquity = equityIRRResult.value
+    const irrEquity = equityIRRResult.value
 
     // 暗黙のCap（検算用）：翌年NOI / P_N
     const rentN1 = in_.rentMonthly0 * pow1p(in_.inflation - in_.rentDecay, N)

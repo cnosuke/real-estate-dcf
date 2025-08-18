@@ -54,3 +54,7 @@ export class ValidationUtils {
     return ValidationUtils.isFiniteNumber(value) && value >= min && value <= max
   }
 }
+
+// 個別の関数エクスポート（静的クラス回避のため）
+export const isFiniteNumber = ValidationUtils.isFiniteNumber
+export const isInRange = ValidationUtils.isInRange

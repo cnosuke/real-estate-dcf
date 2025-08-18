@@ -71,6 +71,23 @@ export class DCFErrorLogger {
   }
 }
 
+// 個別の関数エクスポート（静的クラス回避のため）
+export const log = DCFErrorLogger.log
+export const setLogLevel = DCFErrorLogger.setLogLevel
+// shouldLogはprivateなので、代替関数を提供
+export function shouldLogError(severity: ErrorSeverity): boolean {
+  const levels = [
+    ErrorSeverity.WARNING,
+    ErrorSeverity.ERROR,
+    ErrorSeverity.CRITICAL,
+  ]
+  const currentIndex = levels.indexOf(
+    DCFErrorLogger['logLevel' as keyof typeof DCFErrorLogger] as ErrorSeverity,
+  )
+  const errorIndex = levels.indexOf(severity)
+  return errorIndex >= currentIndex
+}
+
 /**
  * 便利関数: エラーをログに記録
  */

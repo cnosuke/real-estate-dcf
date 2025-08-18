@@ -105,7 +105,6 @@ export class DCFError extends Error {
   }
 }
 
-
 /**
  * エラーログエントリ
  */
@@ -116,16 +115,16 @@ export interface ErrorLogEntry {
 }
 
 /**
- * エラー型のタイプガード
+ * エラー型のタイプガード（内部使用のみ）
  */
-export function isDCFError(error: unknown): error is DCFError {
+function _isDCFError(error: unknown): error is DCFError {
   return error instanceof DCFError
 }
 
 /**
- * エラーの重要度による並び替え用の優先度
+ * エラーの重要度による並び替え用の優先度（内部使用のみ）
  */
-export const ERROR_SEVERITY_PRIORITY: Record<ErrorSeverity, number> = {
+const _ERROR_SEVERITY_PRIORITY: Record<ErrorSeverity, number> = {
   [ErrorSeverity.CRITICAL]: 3,
   [ErrorSeverity.ERROR]: 2,
   [ErrorSeverity.WARNING]: 1,

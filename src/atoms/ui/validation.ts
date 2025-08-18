@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
-import { DCFValidator } from '@/lib/validation'
 import type { DCFError } from '@/lib/errors'
+import { DCFValidator } from '@/lib/validation'
 import { dcfInputAtom } from '../calculation/dcf-input'
 
 // バリデーション結果のキャッシュ
@@ -20,7 +20,7 @@ const businessRulesValidationAtom = atom((get) => {
   return DCFValidator.validateBusinessRules(input)
 })
 
-// バリデーション結果の便利なselector
+// バリデーション結果の便利なselector（DCFFormProviderで使用）
 export const inputErrorsAtom = atom((get) => {
   const inputValidation = get(inputValidationAtom)
   const businessValidation = get(businessRulesValidationAtom)
@@ -43,8 +43,8 @@ export const hasInputWarningsAtom = atom((get) => {
   return warnings.length > 0
 })
 
-// フィールド別のエラー取得
-export const getFieldErrorAtom = atom(
+// フィールド別のエラー取得（内部使用のみ）
+const _getFieldErrorAtom = atom(
   (get) =>
     (fieldName: string): DCFError | undefined => {
       const errors = get(inputErrorsAtom)
@@ -52,8 +52,8 @@ export const getFieldErrorAtom = atom(
     },
 )
 
-// フィールド別の警告取得
-export const getFieldWarningAtom = atom(
+// フィールド別の警告取得（内部使用のみ）
+const _getFieldWarningAtom = atom(
   (get) =>
     (fieldName: string): DCFError | undefined => {
       const warnings = get(inputWarningsAtom)
@@ -63,8 +63,8 @@ export const getFieldWarningAtom = atom(
     },
 )
 
-// 複数フィールドのエラー状態（フォーム全体の状態管理）
-export const fieldErrorsMapAtom = atom((get) => {
+// 複数フィールドのエラー状態（内部使用のみ）
+const _fieldErrorsMapAtom = atom((get) => {
   const errors = get(inputErrorsAtom)
   const errorMap = new Map<string, DCFError>()
 
@@ -77,7 +77,7 @@ export const fieldErrorsMapAtom = atom((get) => {
   return errorMap
 })
 
-export const fieldWarningsMapAtom = atom((get) => {
+const _fieldWarningsMapAtom = atom((get) => {
   const warnings = get(inputWarningsAtom)
   const warningMap = new Map<string, DCFError>()
 
@@ -90,8 +90,8 @@ export const fieldWarningsMapAtom = atom((get) => {
   return warningMap
 })
 
-// バリデーション状態サマリー
-export const validationSummaryAtom = atom((get) => {
+// バリデーション状態サマリー（内部使用のみ）
+const _validationSummaryAtom = atom((get) => {
   const inputErrors = get(inputErrorsAtom)
   const inputWarnings = get(inputWarningsAtom)
   const inputValidation = get(inputValidationAtom)
