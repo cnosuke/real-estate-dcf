@@ -58,7 +58,7 @@ export function DCFFormProvider({
     if (autoCalculate && !hasErrors) {
       executeCalculation()
     }
-  }, [hasErrors, autoCalculate, executeCalculation])
+  }, [input, hasErrors, autoCalculate, executeCalculation])
 
   const getFieldError = React.useCallback(
     (fieldName: string): DCFError | undefined => {

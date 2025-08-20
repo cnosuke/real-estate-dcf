@@ -30,10 +30,10 @@ export function PropertyBasicSection() {
       open={isExpanded}
       onOpenChange={() => toggleSection('propertyBasic')}
     >
-      <Card>
+      <Card className="shadow-sm">
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50">
-            <CardTitle className="flex items-center justify-between">
+          <CardHeader className="cursor-pointer hover:bg-blue-50 py-2 bg-gradient-to-r from-blue-50 to-cyan-50 border-b border-blue-100">
+            <CardTitle className="flex items-center justify-between text-sm text-blue-800">
               <div className="flex items-center gap-2">
                 {sectionHelp.title}
                 <HelpTooltip
@@ -45,12 +45,12 @@ export function PropertyBasicSection() {
                 className={`h-4 w-4 transition-transform ${isExpanded ? 'rotate-180' : ''}`}
               />
             </CardTitle>
-            <CardDescription>{sectionHelp.description}</CardDescription>
+            <CardDescription className="text-xs">{sectionHelp.description}</CardDescription>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <CardContent className="space-y-2 py-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
               <InputField
                 fieldName="p0"
                 label="物件価格"

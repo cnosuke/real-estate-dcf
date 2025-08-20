@@ -31,7 +31,7 @@ export function HelpTooltip({
         </TooltipTrigger>
         <TooltipContent
           side={placement}
-          className="bg-white border border-border shadow-lg opacity-100 z-50 p-4"
+          className="bg-white border border-border shadow-lg opacity-100 z-50 p-4 text-left"
           style={{ maxWidth }}
         >
           {title && (

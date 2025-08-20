@@ -20,9 +20,9 @@ export function DCFInputForm() {
 
 function DCFInputFormContent() {
   return (
-    <Card>
+    <Card className="shadow-sm">
       <DCFInputFormHeader />
-      <CardContent className="space-y-8">
+      <CardContent className="space-y-3 py-3">
         {/* 入力セクション */}
         <PropertyBasicSection />
         <MarketRiskSection />

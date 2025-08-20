@@ -111,9 +111,9 @@ export function InputField({
 
   return (
     <WithFieldError error={fieldError}>
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <Label htmlFor={fieldName}>{label}</Label>
+      <div className="space-y-0.5">
+        <div className="flex items-center gap-0.5">
+          <Label htmlFor={fieldName} className="text-xs font-medium">{label}</Label>
           {displayHelpText && (
             <HelpTooltip
               title={displayHelpText.title}
@@ -121,26 +121,21 @@ export function InputField({
             />
           )}
         </div>
-        <div className="space-y-1">
-          <Input
-            id={fieldName}
-            type="number"
-            value={formatValue(value)}
-            onChange={handleChange}
-            step={step}
-            min={min}
-            max={max}
-            placeholder={placeholder}
-            className={className}
-          />
-          {formattedDisplay && (
-            <div className="text-xs text-muted-foreground/70 font-mono">
-              {formattedDisplay}
-            </div>
-          )}
-        </div>
-        {type === 'percentage' && (
-          <span className="text-xs text-muted-foreground">（%で入力）</span>
+        <Input
+          id={fieldName}
+          type="number"
+          value={formatValue(value)}
+          onChange={handleChange}
+          step={step}
+          min={min}
+          max={max}
+          placeholder={placeholder}
+          className={`h-8 text-xs px-2 ${className || ''}`}
+        />
+        {formattedDisplay && (
+          <div className="text-xs text-muted-foreground/60 font-mono leading-none">
+            {formattedDisplay}
+          </div>
         )}
       </div>
     </WithFieldError>

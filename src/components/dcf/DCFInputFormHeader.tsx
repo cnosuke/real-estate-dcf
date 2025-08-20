@@ -266,11 +266,11 @@ export function DCFInputFormHeader() {
   }
 
   return (
-    <CardHeader>
+    <CardHeader className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200">
       <div className="flex items-center justify-between">
         <div>
-          <CardTitle>DCF分析パラメータ</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-gray-800">DCF分析パラメータ</CardTitle>
+          <CardDescription className="text-gray-600">
             不動産投資の分析に必要な項目を入力してください
           </CardDescription>
         </div>
